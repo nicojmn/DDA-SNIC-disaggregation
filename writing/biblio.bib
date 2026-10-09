@@ -311,3 +311,101 @@
 	langid = {english},
 	file = {PDF:/home/nicolas/Zotero/storage/D67Q6LI2/Marinos et al. - 2017 - DiskCryptNet rethinking the stack for high-performance video streaming.pdf:application/pdf},
 }
+
+@incollection{mecheloni_inside_2018,
+	edition = {Second Edition},
+	title = {Inside Solid State Drives ({SSD})},
+	volume = {37},
+	isbn = {78-981-13-0598-6},
+	issn = {2197-6643},
+	url = {https://link.springer.com/book/10.1007/978-981-13-0599-3},
+	doi = {10.1007/978-981-13-0599-3},
+	series = {Springer Series in Advanced Microelectronic},
+	pages = {1--41},
+	booktitle = {Inside Solid State Drives ({SSD})},
+	publisher = {Springer},
+	author = {Mecheloni, Rino and Marelli, Aleesia and Eshghi, Kam},
+	date = {2018},
+}
+
+
+
+@inproceedings{guo_leed_2023,
+	location = {New York, {NY}, {USA}},
+	title = {{LEED}: A Low-Power, Fast Persistent Key-Value Store on {SmartNIC} {JBOFs}},
+	isbn = {979-8-4007-0236-5},
+	url = {https://dl.acm.org/doi/10.1145/3603269.3604880},
+	doi = {10.1145/3603269.3604880},
+	series = {{ACM} {SIGCOMM} '23},
+	shorttitle = {{LEED}},
+	abstract = {The recent emergence of low-power high-throughput programmable storage platforms-{SmartNIC} {JBOF} (just-a-bunch-of-flash)-motivates us to rethink the cluster architecture and system stack for energy-efficient large-scale data-intensive workloads. Unlike conventional systems that use an array of server {JBOFs} or embedded storage nodes, the introduction of {SmartNIC} {JBOFs} has drastically changed the cluster compute, memory, and I/O configurations. Such an extremely imbalanced architecture makes prior system design philosophies and techniques either ineffective or invalid.This paper presents {LEED}, a distributed, replicated, and persistent key-value store over an array of {SmartNIC} {JBOFs}. Our key ideas to tackle the unique challenges induced by a {SmartNIC} {JBOF} are: trading excessive I/O bandwidth for scarce {SmartNIC} core computing cycles and memory capacity; making scheduling decisions as early as possible to streamline the request execution flow. {LEED} systematically revamps the software stack and proposes techniques across per-{SSD}, intra-{JBOF}, and inter-{JBOF} levels. Our prototyped system based on Broadcom Stingray outperforms existing solutions that use beefy server {JBOFs} and wimpy embedded storage nodes by 4.2×/3.8× and 17.5×/19.1× in terms of requests per Joule for 256B/1KB key-value objects.},
+	pages = {1012--1027},
+	booktitle = {Proceedings of the {ACM} {SIGCOMM} 2023 Conference},
+	publisher = {Association for Computing Machinery},
+	author = {Guo, Zerui and Zhang, Hua and Zhao, Chenxingyu and Bai, Yuebin and Swift, Michael and Liu, Ming},
+	urldate = {2026-07-28},
+	date = {2023-09-01},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/N8U4SS7R/Guo et al. - 2023 - LEED A Low-Power, Fast Persistent Key-Value Store on SmartNIC JBOFs.pdf:application/pdf},
+}
+
+@inproceedings{shen_ditto_2023,
+	location = {New York, {NY}, {USA}},
+	title = {Ditto: An Elastic and Adaptive Memory-Disaggregated Caching System},
+	isbn = {979-8-4007-0229-7},
+	url = {https://dl.acm.org/doi/10.1145/3600006.3613144},
+	doi = {10.1145/3600006.3613144},
+	series = {{SOSP} '23},
+	shorttitle = {Ditto},
+	abstract = {In-memory caching systems are fundamental building blocks in cloud services. However, due to the coupled {CPU} and memory on monolithic servers, existing caching systems cannot elastically adjust resources in a resource-efficient and agile manner. To achieve better elasticity, we propose to port in-memory caching systems to the disaggregated memory ({DM}) architecture, where compute and memory resources are decoupled and can be allocated flexibly. However, constructing an elastic caching system on {DM} is challenging since accessing cached objects with {CPU}-bypass remote memory accesses hinders the execution of caching algorithms. Moreover, the elastic changes of compute and memory resources on {DM} affect the access patterns of cached data, compromising the hit rates of caching algorithms. We design Ditto, the first caching system on {DM}, to address these challenges. Ditto first proposes a client-centric caching framework to efficiently execute various caching algorithms in the compute pool of {DM}, relying only on remote memory accesses. Then, Ditto employs a distributed adaptive caching scheme that adaptively switches to the best-fit caching algorithm in real-time based on the performance of multiple caching algorithms to improve cache hit rates. Our experiments show that Ditto effectively adapts to the changing resources on {DM} and outperforms the state-of-the-art caching systems by up to 3.6× in real-world workloads and 9× in {YCSB} benchmarks.},
+	pages = {675--691},
+	booktitle = {Proceedings of the 29th Symposium on Operating Systems Principles},
+	publisher = {Association for Computing Machinery},
+	author = {Shen, Jiacheng and Zuo, Pengfei and Luo, Xuchuan and Su, Yuxin and Gu, Jiazhen and Feng, Hao and Zhou, Yangfan and Lyu, Michael R.},
+	urldate = {2026-07-28},
+	date = {2023-10-23},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/FHTDEJR3/Shen et al. - 2023 - Ditto An Elastic and Adaptive Memory-Disaggregated Caching System.pdf:application/pdf},
+}
+
+
+@online{pcie-6-specs,
+	title = {{PCI} Express 6.0 Specification {\textbar} {PCI}-{SIG}},
+	url = {https://pcisig.com/pci-express-6.0-specification},
+	urldate = {2026-07-28},
+	file = {PCI Express 6.0 Specification | PCI-SIG:/home/nicolas/Zotero/storage/ENAKU2H3/pci-express-6.html:text/html},
+}
+
+
+@software{glozer_wgwrk_2026,
+	title = {wg/wrk},
+	url = {https://github.com/wg/wrk},
+	abstract = {Modern {HTTP} benchmarking tool},
+	author = {Glozer, Will},
+	urldate = {2026-08-04},
+	date = {2026-08-04},
+	note = {original-date: 2012-03-20T11:12:28Z},
+}
+
+
+@online{solidigm_2026,
+	title = {Solidigm P44 Pro 1 {TB} Specs},
+	url = {https://www.techpowerup.com/ssd-specs/solidigm-p44-pro-1-tb.d1124},
+	abstract = {1 {TB}, {TLC}, {PCIe} 4.0 x4, M.2 2280},
+	titleaddon = {{TechPowerUp}},
+	urldate = {2026-08-05},
+	date = {2026-08-05},
+	langid = {english},
+	file = {Snapshot:/home/nicolas/Zotero/storage/TCB45JPY/solidigm-p44-pro-1-tb.html:text/html},
+}
+
+@online{ssdpfkkw010x7x1performance_nodate,
+	title = {{SSDPFKKW}010X7X1{\textbar}[Performance upgrade] {SOLIDIGM} P44-{PRO} {SSDPFKKW}010X7X1 M.2 {PCIE}4.0 1TB Solid-state drive {SSD}, unlocking high-speed read and write experience!-{HK} {STES} {TECHNOLOGY} {CO}., {LIMITED}},
+	url = {https://www.stesz.com/m2/SSDPFKKW010X7X1-e.html},
+	urldate = {2026-08-05},
+}
+
+@online{solidigm_benchmark_nodate,
+	title = {{SOLIDIGM} {SSDPFKKW}010X7 - Benchmark performance},
+	url = {https://www.harddrivebenchmark.net/hdd.php?hdd=SOLIDIGM+SSDPFKKW010X7&id=33003},
+	urldate = {2026-08-05},
+	file = {SOLIDIGM SSDPFKKW010X7 - Benchmark performance:/home/nicolas/Zotero/storage/JQQ986TI/hdd.html:text/html},
+}

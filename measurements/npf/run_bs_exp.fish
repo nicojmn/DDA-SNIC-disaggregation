@@ -18,7 +18,7 @@ else
 end
 
 if set -q _flag_suffix
-    set title_suffix $_flag_suffix
+    set title_suffix "$_flag_suffix"
 end
 
 function sed_mode -a m file

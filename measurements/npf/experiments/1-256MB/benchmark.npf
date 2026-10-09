@@ -1,0 +1,148 @@
+%info
+// mode will be set up automically by fish script
+// Alternatively, you can manually run npf and set up a mode
+SLC benchmark for [mode] operations
+
+%config
+
+n_runs=5
+var_names={BANDWIDTH:Throughput,ENGINE:I/O engine,SIZE:File size (MB),IO_BYTES:Bytes read/written}
+var_unit={BANDWIDTH:B/s,SIZE:B,IO_BYTES:B}
+var_divider={BANDWIDTH:1,SIZE:0.000001,IO_BYTES:1}
+var_format={BANDWIDTH:eng.0,SIZE:eng.0.B,IO_BYTES:eng.0}
+graph_serie=ENGINE
+graph_type=barplot
+
+%variables
+ENGINE={spdk_bdev,libaio,io_uring}
+SIZE=[1*256]
+
+%late_variables
+RW={mode}
+PCI_ADDRESS={0000:02:00.0}
+NVME={nvme0n2}
+
+%script@server sudo=true timeout=600
+
+
+
+if [[ "${RW}" == *"rw" ]];
+then
+    MIXED_PARAMS="--rwmixread=50 --norandommap=1"
+else
+    MIXED_PARAMS=""
+fi
+
+if [[ "${ENGINE}" == "spdk_bdev" ]];
+then
+    if [ -b "/dev/${NVME}" ]; then
+        NVME=""
+        for dev in /dev/nvme0n*; do
+            [ -b "$dev" ] || continue
+            SYSFS_LINK=$(readlink -f /sys/class/block/$(basename "$dev") 2>/dev/null)
+            if echo "$SYSFS_LINK" | grep -q "${PCI_ADDRESS}"; then
+                NVME=$(basename "$dev")
+                echo "Found NVMe device: ${NVME} at PCI ${PCI_ADDRESS}"
+                break
+            fi
+        done
+    
+        if [ -z "$NVME" ]; then
+            echo "ERROR: Could not find NVMe device at PCI ${PCI_ADDRESS}"
+        fi
+        
+        PCI_ALLOWED=${PCI_ADDRESS} /etinfo/users/2021/njeanmenne/spdk/scripts/setup.sh
+        while [ -b "/dev/${NVME}" ]; do
+            echo "Waiting to bind SPDK (${NVME})..."
+            sleep 1
+        done
+    fi
+    cat > "/tmp/benchmark-conf.json" << JSON
+{
+  "subsystems": [
+    {
+      "subsystem": "bdev",
+      "config": [
+        {
+          "method": "bdev_nvme_attach_controller",
+          "params": {
+            "name": "Nvme0",
+            "trtype": "PCIe",
+            "traddr": "${PCI_ADDRESS}"
+          }
+        }
+      ]
+    }
+  ]
+}
+JSON
+
+    LD_PRELOAD=/etinfo/users/2021/njeanmenne/spdk/build/fio/spdk_bdev fio --name=npf_spdk-fio_read \
+              --ioengine=${ENGINE} \
+              --spdk_json_conf=/tmp/benchmark-conf.json \
+              --filename=Nvme0n1 \
+              --direct=1 \
+              --thread=1 \
+              --overwrite=1 \
+              --time_based=1 \
+              --runtime=30 \
+              --ramp_time=10 \
+              --rw=${RW} \
+              --bs=4K \
+              --iodepth=64 \
+              --size=${SIZE}M \
+              ${MIXED_PARAMS} \
+              --output-format=json > fio.json
+else
+
+    if [ ! -b "/dev/${NVME}" ]; then
+        NVME=""
+        for dev in /dev/nvme0n*; do
+            [ -b "$dev" ] || continue
+            SYSFS_LINK=$(readlink -f /sys/class/block/$(basename "$dev") 2>/dev/null)
+            if echo "$SYSFS_LINK" | grep -q "${PCI_ADDRESS}"; then
+                NVME=$(basename "$dev")
+                echo "Found NVMe device: ${NVME} at PCI ${PCI_ADDRESS}"
+                break
+            fi
+        done
+    
+        if [ -z "$NVME" ]; then
+            echo "ERROR: Could not find NVMe device at PCI ${PCI_ADDRESS}"
+        fi
+        
+        /etinfo/users/2021/njeanmenne/spdk/scripts/setup.sh reset
+        while [ ! -b "/dev/${NVME}" ]; do
+            echo "Waiting to bind nvme driver (${NVME})..."
+            sleep 1
+        done
+    fi
+  
+    fio --name=npf_spdk-fio_read \
+        --ioengine=${ENGINE} \
+        --filename=/dev/${NVME} \
+        --direct=1 \
+        --thread=1 \
+        --overwrite=1 \
+        --time_based=1 \
+        --runtime=30 \
+        --ramp_time=10 \
+        --rw=${RW} \
+        --bs=4K \
+        --iodepth=64 \
+        --size=${SIZE}M \
+        ${MIXED_PARAMS} \
+        --output-format=json > fio.json
+fi
+
+if [[ "${RW}" == *"read"* ]];
+then
+    bw_bps=$(jq '.jobs[0].read.bw_bytes' fio.json)
+    io_bytes=$(jq '.jobs[0].read.io_bytes' fio.json)
+else
+    bw_bps=$(jq '.jobs[0].write.bw_bytes' fio.json)
+    io_bytes=$(jq '.jobs[0].write.io_bytes' fio.json)
+fi
+
+echo "RESULT-BANDWIDTH $bw_bps"
+echo "RESULT-IO_BYTES $io_bytes"

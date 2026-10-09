@@ -1,0 +1,126 @@
+\section{Disk performances}
+
+\subsection{Read operations}
+
+\begin{table}[H]
+\centering
+\caption{Statistical summary of figure \ref{fig:read-bandwidth-4K} : read throughput with 4kB block size}
+\label{tab:stats-bandwidth-4K}
+% \renewcommand{\arraystretch}{1.0}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}l l c c c c c@{}}
+\toprule
+\textbf{Engine} & \textbf{Size (MB)} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Median} & \textbf{Max} \\
+\midrule
+\midrule
+\textbf{io\_uring} & 4 & 584.21MB/s & 33.50MB/s & 524.29MB/s & 599.19MB/s & 599.19MB/s \\
+\textbf{io\_uring} & 10 & 956.43MB/s & 61.94MB/s & 873.81MB/s & 953.25MB/s & 1.05GB/s \\
+\textbf{io\_uring} & 100 & 2.01GB/s & 41.52MB/s & 1.94GB/s & 2.02GB/s & 2.06GB/s \\
+\textbf{io\_uring} & 1024 & 2.38GB/s & 55.04MB/s & 2.30GB/s & 2.36GB/s & 2.45GB/s \\
+\midrule
+\textbf{libaio} & 4 & 584.21MB/s & 33.50MB/s & 524.29MB/s & 599.19MB/s & 599.19MB/s \\
+\textbf{libaio} & 10 & 905.59MB/s & 43.51MB/s & 873.81MB/s & 873.81MB/s & 953.25MB/s \\
+\textbf{libaio} & 100 & 1.89GB/s & 45.43MB/s & 1.84GB/s & 1.91GB/s & 1.94GB/s \\
+\textbf{libaio} & 1024 & 2.25GB/s & 13.68MB/s & 2.24GB/s & 2.25GB/s & 2.27GB/s \\
+\midrule
+\textbf{spdk\_bdev} & 4 & 2.63GB/s & 10.07MB/s & 2.62GB/s & 2.62GB/s & 2.64GB/s \\
+\textbf{spdk\_bdev} & 10 & 2.98GB/s & 313.99kB/s & 2.98GB/s & 2.98GB/s & 2.98GB/s \\
+\textbf{spdk\_bdev} & 100 & 2.51GB/s & 1.49MB/s & 2.51GB/s & 2.51GB/s & 2.51GB/s \\
+\textbf{spdk\_bdev} & 1024 & 3.00GB/s & 12.46MB/s & 2.99GB/s & 3.01GB/s & 3.01GB/s \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Statistical summary of figure \ref{fig:read-bandwidth-4M} : read throughput with 4MB block size}
+\label{tab:stats-bandwidth-4M}
+% \renewcommand{\arraystretch}{1.0}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}l l c c c c c@{}}
+\toprule
+\textbf{Engine} & \textbf{Size (MB)} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Median} & \textbf{Max} \\
+\midrule
+\midrule
+\textbf{io\_uring} & 4 & 1.33GB/s & 147.37MB/s & 1.05GB/s & 1.40GB/s & 1.40GB/s \\
+\textbf{io\_uring} & 10 & 1.97GB/s & 202.60MB/s & 1.68GB/s & 2.10GB/s & 2.10GB/s \\
+\textbf{io\_uring} & 100 & 3.30GB/s & 218.24MB/s & 2.69GB/s & 3.38GB/s & 3.38GB/s \\
+\textbf{io\_uring} & 1024 & 5.41GB/s & 96.58MB/s & 5.32GB/s & 5.36GB/s & 5.56GB/s \\
+\midrule
+\textbf{libaio} & 4 & 1.53GB/s & 595.86MB/s & 262.14MB/s & 1.40GB/s & 2.10GB/s \\
+\textbf{libaio} & 10 & 2.01GB/s & 176.85MB/s & 1.68GB/s & 2.10GB/s & 2.10GB/s \\
+\textbf{libaio} & 100 & 3.31GB/s & 196.16MB/s & 2.76GB/s & 3.38GB/s & 3.38GB/s \\
+\textbf{libaio} & 1024 & 5.43GB/s & 122.58MB/s & 5.24GB/s & 5.38GB/s & 5.62GB/s \\
+\midrule
+\textbf{spdk\_bdev} & 4 & 6.73GB/s & 11.97MB/s & 6.72GB/s & 6.73GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 10 & 6.74GB/s & 12.38MB/s & 6.72GB/s & 6.74GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 100 & 6.72GB/s & 16.74MB/s & 6.70GB/s & 6.72GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 1024 & 6.73GB/s & 14.98MB/s & 6.71GB/s & 6.73GB/s & 6.75GB/s \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\subsection{Write operations}
+
+
+\begin{table}[H]
+\centering
+\caption{Statistical summary of figure \ref{fig:write-bandwidth-4K} : write throughput with 4kB block size}
+\label{tab:stats-write-bandwidth-4K}
+% \renewcommand{\arraystretch}{1.0}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}l l c c c c c@{}}
+\toprule
+\textbf{Engine} & \textbf{Size (MB)} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Median} & \textbf{Max} \\
+\midrule
+\midrule
+\textbf{io\_uring} & 4 & 1.05GB/s & 0.00B/s & 1.05GB/s & 1.05GB/s & 1.05GB/s \\
+\textbf{io\_uring} & 10 & 1.39GB/s & 102.56MB/s & 1.31GB/s & 1.31GB/s & 1.50GB/s \\
+\textbf{io\_uring} & 100 & 1.71GB/s & 165.90MB/s & 1.57GB/s & 1.61GB/s & 1.91GB/s \\
+\textbf{io\_uring} & 1024 & 2.10GB/s & 55.96MB/s & 2.03GB/s & 2.08GB/s & 2.16GB/s \\
+\midrule
+\textbf{libaio} & 4 & 608.59MB/s & 202.29MB/s & 246.72MB/s & 699.05MB/s & 699.05MB/s \\
+\textbf{libaio} & 10 & 991.38MB/s & 52.21MB/s & 953.25MB/s & 953.25MB/s & 1.05GB/s \\
+\textbf{libaio} & 100 & 1.87GB/s & 87.03MB/s & 1.78GB/s & 1.84GB/s & 1.98GB/s \\
+\textbf{libaio} & 1024 & 2.02GB/s & 35.20MB/s & 1.98GB/s & 2.01GB/s & 2.07GB/s \\
+\midrule
+\textbf{spdk\_bdev} & 4 & 5.16GB/s & 2.48GB/s & 731.38MB/s & 6.24GB/s & 6.34GB/s \\
+\textbf{spdk\_bdev} & 10 & 6.28GB/s & 62.16MB/s & 6.23GB/s & 6.24GB/s & 6.36GB/s \\
+\textbf{spdk\_bdev} & 100 & 6.27GB/s & 49.40MB/s & 6.23GB/s & 6.25GB/s & 6.33GB/s \\
+\textbf{spdk\_bdev} & 1024 & 6.25GB/s & 35.50MB/s & 6.19GB/s & 6.26GB/s & 6.28GB/s \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Statistical summary of figure \ref{fig:write-bandwidth-4M} : write throughput with 4MB block size}
+\label{tab:stats-write-bandwidth-4M}
+% \renewcommand{\arraystretch}{1.0}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}l l c c c c c@{}}
+\toprule
+\textbf{Engine} & \textbf{Size (MB)} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Median} & \textbf{Max} \\
+\midrule
+\midrule
+\textbf{io\_uring} & 4 & 1.33GB/s & 147.37MB/s & 1.05GB/s & 1.40GB/s & 1.40GB/s \\
+\textbf{io\_uring} & 10 & 1.97GB/s & 202.60MB/s & 1.68GB/s & 2.10GB/s & 2.10GB/s \\
+\textbf{io\_uring} & 100 & 3.30GB/s & 218.24MB/s & 2.69GB/s & 3.38GB/s & 3.38GB/s \\
+\textbf{io\_uring} & 1024 & 5.41GB/s & 96.58MB/s & 5.32GB/s & 5.36GB/s & 5.56GB/s \\
+\midrule
+\textbf{libaio} & 4 & 1.53GB/s & 595.86MB/s & 262.14MB/s & 1.40GB/s & 2.10GB/s \\
+\textbf{libaio} & 10 & 2.01GB/s & 176.85MB/s & 1.68GB/s & 2.10GB/s & 2.10GB/s \\
+\textbf{libaio} & 100 & 3.31GB/s & 196.16MB/s & 2.76GB/s & 3.38GB/s & 3.38GB/s \\
+\textbf{libaio} & 1024 & 5.43GB/s & 122.58MB/s & 5.24GB/s & 5.38GB/s & 5.62GB/s \\
+\midrule
+\textbf{spdk\_bdev} & 4 & 6.73GB/s & 11.97MB/s & 6.72GB/s & 6.73GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 10 & 6.74GB/s & 12.38MB/s & 6.72GB/s & 6.74GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 100 & 6.72GB/s & 16.74MB/s & 6.70GB/s & 6.72GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 1024 & 6.73GB/s & 14.98MB/s & 6.71GB/s & 6.73GB/s & 6.75GB/s \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

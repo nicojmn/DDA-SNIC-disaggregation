@@ -4,7 +4,7 @@ This chapter will cover evaluation steps-to-step from the baseline to the implem
     \centering
     \caption{Frodo server specifications}
     \label{table:frodo-specs}
-    \begin{tabular}{|c|c|}
+    \begin{tabular}{|c||c|}
         \hline
         OS & Ubuntu 22.04.5 LTS \\
         \hline
@@ -18,9 +18,9 @@ This chapter will cover evaluation steps-to-step from the baseline to the implem
 
 \begin{table}[htbp]
     \centering
-    \caption{SmartNIC speficication}
+    \caption{SmartNIC specification}
     \label{table:smartnic-specs}
-        \begin{tabular}{|c|c|}
+        \begin{tabular}{|c||c|}
         \hline
         Model & Mellanox Connect-6 \\
         \hline
@@ -30,67 +30,156 @@ This chapter will cover evaluation steps-to-step from the baseline to the implem
         \hline
         CPU & ARM Cortex-A72 (8 cores) \\
         \hline
+        Speed & 100 Gbps \\
+        \hline
     \end{tabular}
 \end{table}
 
-\section{Disk performances baseline}
+\section{Disks performances baseline}
 
-The first step in the measurements process is to evaluate the \acrfull{io} baseline performances of the disk, with and without \acrshort{spdk}. We used \texttt{\acrfull{fio}} \cite{noauthor_kernelgitaxboefiogit_nodate} with \texttt{libaio} \cite{libaio} engine to test the throughput of the Linux kernel. Then we'll use \texttt{\acrshort{spdk}} own \acrshort{bdev} \acrfull{aio} engine.
+The first step in the measurements process is to evaluate the \acrfull{io} baseline performances of the disks, with and without \acrshort{spdk}. The first disk is connected to a \acrshort{pcie} 4.0 slot. We will call it disk A. The second disk is connected to a \acrshort{pcie} 3.0 slot. We will call it disk B. We used \texttt{\acrfull{fio}} \cite{noauthor_kernelgitaxboefiogit_nodate} with \texttt{libaio} \cite{libaio} engine to test the throughput of the Linux kernel. Then we'll use \texttt{\acrshort{spdk}} own \acrshort{bdev} \acrfull{aio} engine.
+Specifications of the disks are given in Table \ref{table:disk-specs}. The disks are SOLIDIGM SSDPFKKW010X7. Vendor theoretical speed are found in \cite{solidigm_2026,solidigm_benchmark_nodate,ssdpfkkw010x7x1performance_nodate}. The disks are connected to a \acrshort{pcie} 4.0 x4 and \acrshort{pcie} 3.0 x4 slot respectively. The submission queue is set to 64 bytes and the completion queue is set to 16 bytes. The maximum number of requests is set to 1023. Information about submission queue, completion queue and maximum number of requests have been collected with \texttt{nvme-cli} \cite{noauthor_linux-nvmenvme-cli_2026}.
 
-\subsection{Throughput}
+In the following subsections \ref{subsec:disk-throughput} and \ref{subsec:disk-latency}, we will benchmark the throughput and latency of the disks with different file size, block size and \acrshort{io} depth. This will give us a baseline to compare with the implementation of \acrshort{nvmeof}, \acrshort{spdk}, and finally \textbf{IO-TCP}.
 
-% TODO : give specs of disk somewhere
-% TODO : mention data availability on the repository
-% INFO about disks : SQ : 64 bytes, CQ : 16 bytes, queue depth : 64, nr_request : 1023
+\begin{table}[htbp]
+    \centering
+        \begin{tabular}{|c||c|}
+        \hline
+        Model & SOLIDIGM SSDPFKKW010X7 \\
+        \hline
+        Name & P44 Pro 1TB \\
+        \hline
+        PCIe slot & disk A : PCIe 4.0 x4, disk B : PCIe 3.0 x4 \\
+        \hline
+        Vendor sequential read speed & 7000 MB/s \\
+        \hline
+        Vendor sequential write speed & 6500 MB/s \\
+        \hline
+        Submission queue & 64 bytes \\
+        \hline
+        Completion queue & 16 bytes \\
+        \hline
+        nr\_request & 1023 \\
+        \hline
+    \end{tabular}
+    \caption{Disks specifications \cite{solidigm_2026,solidigm_benchmark_nodate,ssdpfkkw010x7x1performance_nodate, noauthor_linux-nvmenvme-cli_2026}}
+    \label{table:disk-specs}
 
-Throughput has been evaluated for different file size, block size and \acrshort{io} depth. \acrshort{io} \acrshort{qd} is set to 1, 16 or 32 and aggregated on mean.
-File size is set to 4MB, 10MB, 100MB and 1GB. 
+\end{table}
+
+\subsection{Throughput} \label{subsec:disk-throughput}
+
+% TO-DO : mention data availability on the repository
+
+Throughput has been evaluated on disk A for different file size, block size and \acrshort{io} depth. \acrshort{io} queue depth is set to 64. Block size is set to 4kB and 4MB. File size is set to 4MB, 10MB, 100MB and 1GB. For each configuration, we run 5 times the test and we compute the mean, standard deviation, minimum, median and maximum throughput. Tests are time-based over 10 seconds, with a ramp time (warming up) of 3 seconds. The results are summarized in tables \ref{tab:stats-bandwidth-4K}, \ref{tab:stats-bandwidth-4M}, and \ref{tab:stats-write-bandwidth-4K}, and \ref{tab:stats-write-bandwidth-4M}. The figures \ref{fig:read-bandwidth-4K}, \ref{fig:read-bandwidth-4M}, \ref{fig:write-bandwidth-4K} and \ref{fig:write-bandwidth-4M} show the throughput of sequential read and write operations with 4kB and 4MB block size respectively. Finally, we ran a time-based test of 300 seconds and ramp time of 30 seconds to evict eventual SLC caching in subsection \ref{subsec:slc-caching}.
 
 
 \subsubsection{Sequential read}
 
-Figure \ref{fig:read-bandwidth-4M} depict the throughput over 4 kilobytes and 4 megabytes block size.  Strictly speaking of maximum throughput, \acrshort{spdk} sequential read only outperforms Linux kernel by $\approx 1.282$ with respectively 7.11 GB/s \textit{versus} 7.02 GB/s. The most significant improvement are for 4 megabytes and 10 megabytes block size where \acrshort{spdk} doubles the throughput of Linux kernel. For 4MB block size, \acrshort{spdk} mean sequential read throughput is 2.1 GB/s while Linux kernel is 1.3 GB/s. For 10MB block size, \acrshort{spdk} mean sequential read throughput is 5.59 GB/s while Linux kernel is 2.76 GB/s. Figure \ref{fig:read-bandwidth-4K} follows the same trend, although there is more variability in the results.
+Figure \ref{fig:read-bandwidth-4K} depicts the throughput over 4 kilobytes block size. At small file size (4MB and 10MB), kernel-path engines are bottlenecked and far behind device bandwidth, while \acrshort{spdk} achieves systemically higher throughput. \acrshort{spdk} deliver up to 4.5 times higher throughput than kernel-path engines. The standard deviation of \acrshort{spdk} is also significantly lower than kernel-path engines, ranging from 313.99 kB/s to 10.7 MB/s while kernel-path engines range from 33.50 MB/s to 61.94 MB/s. At larger file size (100MB and 1GB), \acrshort{spdk} is still ahead of kernel-path engines, but the throughput remains 0.8 times higher. The standard deviation of \acrshort{spdk} is yet again significantly lower than kernel-path engines, ranging from 1.49 MB/s to 12.46 MB/s while kernel-path engines range from 41.52 MB/s to 55.04 MB/s. The results are summarized in table \ref{tab:stats-bandwidth-4K}. The reason why \acrshort{spdk} performs better than kernel-path engines is that \acrshort{spdk} bypasses the kernel and directly accesses the device, while kernel-path engines have to go through the kernel, which adds overhead. 
+% Explain why kernel perfoms better at large file than small file.
+% Run perf 
+% Tests with multiple threads / cores
+
+Looking at figure \ref{fig:read-bandwidth-4M} which illustrates throughput with 4 megabytes block size, we can observe that througput of all engines increase compared to 4kB block size. \acrshort{spdk} is consistent for all file size, with an average throughput of 6.73 GB/s (maximum achived is 6.75 GB/s). This throughput is close to the vendor theoretical speed of 7 GB/s. Kernel-path engines are still bottlenecked at small file size (4MB and 10MB), with an average throughput of respectively 1.53 GB/s and 2.01 GB/s, thus making \acrshort{spdk} 4.4 times faster than kernel-path engines. At larger file size (100MB and 1GB), kernel-path engines are able to achieve a mean throughput of 3.31 GB/s and 5.43 GB/s respectively, thus making \acrshort{spdk} 1.24 to 2.03 times faster than kernel-path engines. Standard deviation of \acrshort{spdk} is also significantly lower than kernel-path engines, ranging from 11.97 MB/s to 16.74 MB/s while kernel-path engines range from 96.58 MB/s to 218.24 MB/s. The results are summarized in table \ref{tab:stats-bandwidth-4M}.
+
+We can conclude that \acrshort{spdk} is able to achieve higher throughput for sequential read operations with lower standard deviation than kernel-path engines, especially at small file size. It also follows the same order of magnitude for small file size regardless of block size, and is able to achieve close to vendor theoretical speed with large block size.
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.48\columnwidth}
+    \begin{minipage}{0.495\columnwidth}
         \centering
-        \includegraphics[width=\linewidth]{../measurements/npf/experiments/bs-4M/graphs/read-BANDWIDTH.pdf}
-        \caption{Throughput of sequential read operations with 4MB block size}
-        \label{fig:read-bandwidth-4M}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.48\columnwidth}
-        \centering
-        \includegraphics[width=\linewidth]{../measurements/npf/experiments/bs-4K/graphs/read-BANDWIDTH.pdf}
+        \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/bs-4K/graphs/read-BANDWIDTH.pdf}
         \caption{Throughput of sequential read operations with 4kB block size}
         \label{fig:read-bandwidth-4K}
     \end{minipage}
-\end{figure}
+    \hfill
+    \begin{minipage}{0.495\columnwidth}
+        \centering
+        \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/bs-4M/graphs/read-BANDWIDTH.pdf}
+        \caption{Throughput of sequential read operations with 4MB block size}
+        \label{fig:read-bandwidth-4M}
+    \end{minipage}
+    
+\endq{figure}
 
 \subsubsection{Sequential write}
 
-For sequential write, the results are less conclusive with 4MB block size. For 4MB and 10MB file size, \acrshort{spdk} performs poorly, being 4 to 5 times slower than Linux kernel. Bigger file size  For 4MB block size, \acrshort{spdk} mean  throughput is 0.3 GB/s while Linux kernel is 1.52 GB/s. For 10MB block size, \acrshort{spdk} throughput is 0.66 GB/s while Linux kernel is 2.58 GB/s. 100MB and 1GB file size on the other side show a significant improvement of \acrshort{spdk} over Linux kernel, with respectively  
+For sequential write with block size of 4 kB (figure \ref{fig:write-bandwidth-4K}), we can observe that \acrshort{spdk} is more stable in its mean output, reaching 6.25 GB/s with standard deviation of 35.09 MB/s to 59.09 MB/s. Kernel-path engines are capped at 2.1 GB/s in their best case, with standard deviation of 35.37 MB/s to 353.55 MB/s.
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.48\columnwidth}
+    \begin{minipage}{0.495\columnwidth}
         \centering
-        \includegraphics[width=\linewidth]{../measurements/npf/experiments/bs-4M/graphs/write-BANDWIDTH.pdf}
-        %\caption{Throughput of sequential write operations with 4MB block size}
-        \label{fig:write-bandwidth-4M}
+        \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/bs-4K/graphs/write-BANDWIDTH.pdf}
+        \caption{Throughput of sequential write operations with 4kB block size}
+        \label{fig:write-bandwidth-4K}
     \end{minipage}
     \hfill
-    \begin{minipage}{0.48\columnwidth}
+    \begin{minipage}{0.495\columnwidth}
         \centering
-        \includegraphics[width=\linewidth]{../measurements/npf/experiments/bs-4K/graphs/write-BANDWIDTH.pdf}
-        %\caption{Throughput of sequential write operations with 4kB block size}
-        \label{fig:write-bandwidth-4K}
+        \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/bs-4M/graphs/write-BANDWIDTH.pdf}
+        \caption{Throughput of sequential write operations with 4MB block size}
+        \label{fig:write-bandwidth-4M}
     \end{minipage}
 \end{figure}
 
-\subsection{Latency}
-    TODO
+While some configurations are able to exceed the vendor theoretical speed of 6.5 GB/s, caution should be taken as even if not specified by the vendor, the disk can use a dynamic \acrshort{pslc} write cache to achieve higher throughput. This is why we ran a time-based test of 300 seconds and ramp time of 30 seconds to evict eventual SLC caching in subsection \ref{subsec:slc-caching}.
+
+
+\subsubsection{SLC cache} \label{subsec:slc-caching}
+
+    TO-DO
+
+\subsection{Latency} \label{subsec:disk-latency}
+    TO-DO
+
+
+\section{NVMe-over-Fabrics performances}
+
+    In this section we evaluate the throughput and latency of NVMe-over-Fabrics with Linux kernel on disk A. The tests evaluate both \acrshort{tcp} and \acrshort{rdma} transport. The tests are made with \texttt{\acrshort{fio}} \cite{noauthor_kernelgitaxboefiogit_nodate} with \texttt{io\_uring} engine. Queue depth is fixed to 64.
+
+    \subsection{Throughput}
+
+        \begin{figure}[H]
+        \centering
+        \begin{minipage}{0.495\columnwidth}
+            \centering
+            \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/nvme-of/graphs/-read-BANDWIDTH.pdf}
+            \caption{Throughput of sequential read operations for NVMe-over-Fabrics with large file size}
+            \label{fig:nmve-of-read-bandwidth}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.495\columnwidth}
+            \centering
+            \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/nvme-of/graphs/small-read-BANDWIDTH.pdf}
+            \caption{Throughput of sequential read operations for NVMe-over-Fabrics with small file size}
+            \label{fig:nmve-of-read-bandwidth-small}
+        \end{minipage}
+    \end{figure}
+
+\section{lighttpd performances}
+
+We benchmarked the \acrshort{http} server \texttt{lighttpd} original version (1.4.32) in order to analyze the difference between the original version and the IO-TCP version. The benchmark is made with \texttt{wrk} \cite{glozer_wgwrk_2026}. To be fair with IO-TCP, we restrict the \texttt{lighttpd} to a single core. Figures \ref{fig:lighttpd-x86} and \ref{fig:lighttpd-arm} show the throughput of \texttt{lighttpd} on Frodo server (x86\_64 core) and on SmartNIC (ARM Cortex-A72 core) respectively. We observe that a single core on Frodo is nearly able to saturate the disk bandwidth.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.495\columnwidth}
+        \centering
+        \includegraphics[width=\linewidth]{../measurements/npf/experiments/lighttpd/frodo-random-100k-BANDWIDTH.pdf}
+        \caption{Throughput of lighttpd on Frodo server (x86\_64 core)}
+        \label{fig:lighttpd-x86}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.495\columnwidth}
+        \centering
+        \includegraphics[width=\linewidth]{../measurements/npf/experiments/lighttpd/bluefield-random-100k-BANDWIDTH.pdf}
+        \caption{Throughput of lighttpd on SmartNIC (ARM Cortex-A72 core)}
+        \label{fig:lighttpd-arm}
+    \end{minipage}
+\end{figure}
+
 
 \section{IO-TCP performances}
 

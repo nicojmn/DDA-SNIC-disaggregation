@@ -1,0 +1,58 @@
+%info
+Benchmark IO-TCP
+
+%config
+
+n_runs=1
+var_names={BANDWIDTH:Throughput,SIZE:File size,CONNECTIONS: Concurrent connections}
+var_unit={BANDWIDTH:b/s,SIZE:B}
+var_divider={BANDWIDTH:1}
+var_format={BANDWIDTH:eng.0}
+// graph_serie=ENGINE
+// graph_type=barplot
+
+%variables
+SIZE={100k,300k,500k,1M}
+// THREAD={1,4,8}
+// CONNECTIONS={1000, 4000, 8000, 16000, 24000}
+
+// CONNECTIONS={10,800,1600,4000}
+CONNECTIONS={10,100,200,400,800}
+%late_variables
+THREAD={8}
+
+%script@bluefield sudo=true
+sudo killall -w -9 offload_write_s 2> /dev/null || true
+LD_LIBRARY_PATH=$HOME/dpdk20.11-install/lib/aarch64-linux-gnu $HOME/IO-TCP/nic_stack/build/offload_write_separated
+
+%script@lighttpd sudo=true delay=5
+
+killall -w -9 lighttpd 2> /dev/null || true
+
+cd $HOME/IO-TCP/host_stack/apps/lighttpd-1.4.32/src
+LD_LIBRARY_PATH=/etinfo/users/2021/njeanmenne/dpdk-20.11-install/lib/x86_64-linux-gnu  \
+    $HOME/IO-TCP/host_stack/apps/lighttpd-1.4.32/src/lighttpd \
+    -D \
+    -f $HOME/IO-TCP/host_stack/apps/lighttpd-1.4.32/doc/config/m-lighttpd.conf \
+    -m $HOME/IO-TCP/host_stack/apps/lighttpd-1.4.32/src/.libs -n 1
+
+
+%script@wrk sudo=true delay=10
+ip netns exec client sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+ip netns exec client sysctl -w net.core.somaxconn=65535
+ulimit -n 1048576
+// ip netns exec client wrk -t ${THREAD} -c ${CONNECTIONS} -d 5 -s $HOME/master-thesis/measurements/npf/experiments/io-tcp/random-requests.lua http://10.0.25.10 &> /tmp/npf-wrk.log
+ip netns exec client wrk -t ${THREAD} -c ${CONNECTIONS} -d 5 http://10.0.25.10/${SIZE} &> /tmp/npf-wrk.log
+
+BW=$(grep 'Transfer/sec:' /tmp/npf-wrk.log | awk '{
+    v = $2
+    sub(/[A-Za-z]+$/, "", v)
+    if (index($2, "KB")) v *= 1000
+    else if (index($2, "MB")) v *= 1000000
+    else if (index($2, "GB")) v *= 1000000000
+    printf "%.0f", v * 8
+}')
+
+echo "RESULT-BANDWIDTH $BW"
+
+killall -w -9 lighttpd 2> /dev/null || true

@@ -29,6 +29,8 @@
 \usepackage[most]{tcolorbox}
 \usepackage[newfloat]{minted}
 \usepackage[svgnames]{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
 
 % Please fill in the following boxes
 % Title of the thesis
@@ -119,6 +121,7 @@
 % Document
 \begin{document}
 % Front cover page
+\thispagestyle{empty}
 \maketitle
 
 \pagestyle{empty}
@@ -128,18 +131,13 @@
 
     \input{src/abstract.tex}
 
-\pagestyle{empty}
-
 \setcounter{tocdepth}{4}
 \tableofcontents
-\thispagestyle{empty}
 \newpage
 
 \printglossary[title= List of acronyms, type=\acronymtype]
-\thispagestyle{empty}
 \newpage
 \listoflistings
-\thispagestyle{empty}
 \newpage
 
 \chapter{Introduction}
@@ -156,23 +154,22 @@
 
 \chapter{Implementation} \label{ch:implementation}
 
-    \input{src/implementation.tex}
+    \input{src/implementation.tex} 
 
 \chapter{Evaluation} \label{ch:evaluation}
 
-    \input{src/evaluation.tex}
+    \input{src/evaluation.tex} 
 
 
 \chapter{Conclusion and future work} \label{ch:conclusion}
 
     \input{src/conclusion.tex}
 
-\chapter{Appendix : performances script} \label{ch:perfs-scripts}
+\chapter*{Appendix : additional plots data} \label{ch:appendix-plots-data}
 \pagenumbering{roman}
 \setcounter{page}{1}
 
-    \input{src/appendix-perf.tex}
-
+    \input{src/appendix-plots-data.tex} 
 
 \printbibliography[heading=bibintoc]
 
