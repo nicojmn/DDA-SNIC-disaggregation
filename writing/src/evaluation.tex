@@ -1,37 +1,37 @@
-This chapter will cover evaluation steps-to-step from the baseline to the implemented solution. The performances evaluation focus mainly on two metrics : throughput and latency. Experiments could be make thanks to \acrfull{npf} \cite{barbette_tbarbettenpf_2026}.
+This chapter will cover evaluation steps-to-step from the baseline to the implemented solution. Information about
+server specifications (called Frodo) are provided in Table \ref{table:frodo-specs}, and information about the SmartNIC specifications are provided in Table \ref{table:smartnic-specs}. The performances evaluation focus mainly on two metrics : throughput and latency. Experiments could be make thanks to \acrfull{npf} \cite{barbette_tbarbettenpf_2026}.
 
-\begin{table}[htbp]
+\begin{table}[htpb]
     \centering
     \caption{Frodo server specifications}
     \label{table:frodo-specs}
-    \begin{tabular}{|c||c|}
-        \hline
-        OS & Ubuntu 22.04.5 LTS \\
-        \hline
-        Kernel & 5.15.0-177-generic \\
-        \hline
-        CPU & Intel(R) Xeon(R) E-2378 CPU @ 2.60GHz (16 cores) \\
-        \hline
-    \end{tabular}
+    \small
+    \begin{tabularx}{\columnwidth}{@{}lX@{}}
+    \toprule
+    \textbf{OS} & Ubuntu 22.04.5 LTS \\
+    \textbf{Kernel} & 5.15.0-177-generic \\
+    \textbf{CPU} & Intel(R) Xeon(R) E-2378 CPU @ 2.60GHz (16 cores) \\
+    \textbf{RAM} & 2x 16 GB  DDR4 3200 MHz \\
+    \textbf{Disks} & 2x SOLIDIGM SSDPFKKW010X7 (1TB) \\
+    \textbf{NIC} & Mellanox ConnectX-6 (cf Table \ref{table:smartnic-specs}) \\
+    \bottomrule
+    \end{tabularx}
 \end{table}
-
 
 \begin{table}[htbp]
     \centering
     \caption{SmartNIC specification}
     \label{table:smartnic-specs}
-        \begin{tabular}{|c||c|}
-        \hline
-        Model & Mellanox Connect-6 \\
-        \hline
-        OS & Ubuntu 22.04.5 LTS \\
-        \hline
-        Kernel & 5.15.0-1082-bluefield \\
-        \hline
-        CPU & ARM Cortex-A72 (8 cores) \\
-        \hline
-        Speed & 100 Gbps \\
-        \hline
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \textbf{Model} & Mellanox ConnectX-6 \\
+        \midrule
+        \textbf{OS} & Ubuntu 22.04.5 LTS \\
+        \textbf{Kernel} & 5.15.0-1082-bluefield \\
+        \textbf{CPU} & ARM Cortex-A72 (8 cores) \\
+        \textbf{RAM} & 16 GB  DDR4 3200 MHz \\
+        \textbf{NIC Speed} & 100 Gbps \\
+        \bottomrule
     \end{tabular}
 \end{table}
 
@@ -44,28 +44,20 @@ In the following subsections \ref{subsec:disk-throughput} and \ref{subsec:disk-l
 
 \begin{table}[htbp]
     \centering
-        \begin{tabular}{|c||c|}
-        \hline
-        Model & SOLIDIGM SSDPFKKW010X7 \\
-        \hline
-        Name & P44 Pro 1TB \\
-        \hline
-        PCIe slot & disk A : PCIe 4.0 x4, disk B : PCIe 3.0 x4 \\
-        \hline
-        Vendor sequential read speed & 7000 MB/s \\
-        \hline
-        Vendor sequential write speed & 6500 MB/s \\
-        \hline
-        Submission queue & 64 bytes \\
-        \hline
-        Completion queue & 16 bytes \\
-        \hline
-        nr\_request & 1023 \\
-        \hline
-    \end{tabular}
-    \caption{Disks specifications \cite{solidigm_2026,solidigm_benchmark_nodate,ssdpfkkw010x7x1performance_nodate, noauthor_linux-nvmenvme-cli_2026}}
+    \caption{Disk specifications~\cite{solidigm_2026,solidigm_benchmark_nodate,ssdpfkkw010x7x1performance_nodate,noauthor_linux-nvmenvme-cli_2026}}
     \label{table:disk-specs}
-
+    \begin{tabularx}{\columnwidth}{@{}l >{\raggedright\arraybackslash}X@{}}
+        \toprule
+        \textbf{Model} & SOLIDIGM SSDPFKKW010X7 (P44 Pro, 1\,TB) \\
+        \midrule
+        \textbf{PCIe slot} & Disk A: PCIe 4.0 $\times$4; Disk B: PCIe 3.0 $\times$4 \\
+        \textbf{Sequential read (vendor)} & 7000 MB/s \\
+        \textbf{Sequential write (vendor)} & 6500 MB/s \\
+        \textbf{Submission queue entry} & 64 bytes \\
+        \textbf{Completion queue entry} & 16 bytes \\
+        \textbf{\texttt{nr\_requests}} & 1023 \\
+        \bottomrule
+    \end{tabularx}
 \end{table}
 
 \subsection{Throughput} \label{subsec:disk-throughput}
@@ -142,7 +134,7 @@ While some configurations are able to exceed the vendor theoretical speed of 6.5
 
     \subsection{Throughput}
 
-        \begin{figure}[H]
+        \begin{figure}[htbp]
         \centering
         \begin{minipage}{0.495\columnwidth}
             \centering
@@ -163,7 +155,7 @@ While some configurations are able to exceed the vendor theoretical speed of 6.5
 
 We benchmarked the \acrshort{http} server \texttt{lighttpd} original version (1.4.32) in order to analyze the difference between the original version and the IO-TCP version. The benchmark is made with \texttt{wrk} \cite{glozer_wgwrk_2026}. To be fair with IO-TCP, we restrict the \texttt{lighttpd} to a single core. Figures \ref{fig:lighttpd-x86} and \ref{fig:lighttpd-arm} show the throughput of \texttt{lighttpd} on Frodo server (x86\_64 core) and on SmartNIC (ARM Cortex-A72 core) respectively. We observe that a single core on Frodo is nearly able to saturate the disk bandwidth.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \begin{minipage}{0.495\columnwidth}
         \centering
