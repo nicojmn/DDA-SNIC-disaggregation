@@ -124,3 +124,158 @@
 \end{tabular}%
 }
 \end{table}
+
+\subsection{Perf categories}
+\newcommand{\pat}[1]{\texttt{\small #1}}
+
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\begin{longtable}{
+  >{\raggedright\arraybackslash}p{\dimexpr 0.24\columnwidth - 2\tabcolsep\relax}
+  >{\raggedright\arraybackslash}p{\dimexpr 0.76\columnwidth - 2\tabcolsep\relax}}
+\caption{Symbol taxonomy for fio engine comparison}
+\label{tab:perf-categories}\\
+\hline
+\textbf{Category} & \textbf{Symbol patterns} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Category} & \textbf{Symbol patterns} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+fio\_engine &
+\pat{fio\_libaio\_}, \pat{fio\_ioring\_} \\
+\hline
+
+liburing\_userspace &
+\pat{\_\_io\_uring}, \pat{io\_uring\_get\_sqe}, \pat{io\_uring\_prep\_},
+\pat{io\_uring\_submit}, \pat{io\_uring\_queue}, \pat{io\_uring\_peek\_batch},
+\pat{io\_uring\_wait\_cqe}, \pat{io\_uring\_cqe\_seen} \\
+\hline
+
+libaio\_userspace &
+\pat{io\_queue\_init}, \pat{\textasciicircum io\_submit\$}, \pat{\textasciicircum io\_getevents\$},
+\pat{\textasciicircum io\_destroy\$}, \pat{\textasciicircum io\_setup\$}, \pat{\textasciicircum io\_cancel\$} \\
+\hline
+
+fio\_stats &
+\pat{add\_slat\_sample}, \pat{add\_clat\_sample}, \pat{add\_lat\_sample},
+\pat{flow\_threshold\_exceeded}, \pat{in\_ramp\_period}, \pat{ramp\_period\_over},
+\pat{queue\_full}, \pat{add\_io\_u\_sample}, \pat{add\_lat\_percentile},
+\pat{stat\_add\_sample} \\
+\hline
+
+fio\_core &
+\pat{io\_u\_}, \pat{get\_io\_u}, \pat{put\_io\_u}, \pat{td\_io\_},
+\pat{td\_set\_runstate}, \pat{do\_io}, \pat{fill\_io\_u}, \pat{init\_io\_u},
+\pat{put\_file}, \pat{get\_file}, \pat{get\_next\_seq\_offset},
+\pat{io\_completed}, \pat{io\_queue\_event}, \pat{account\_io\_completion},
+\pat{lock\_file}, \pat{log\_io\_u}, \pat{fio\_backend}, \pat{fio\_file\_done},
+\pat{fio\_file\_open}, \pat{fio\_fill\_issue\_time}, \pat{fio\_}, \pat{td\_} \\
+\hline
+
+fio\_time &
+\pat{\_\_fio\_gettime}, \pat{fio\_gettime}, \pat{fio\_clock\_init},
+\pat{fio\_get\_mono\_time}, \pat{ntime\_since}, \pat{clock\_thread\_fn} \\
+\hline
+
+Libc &
+\pat{\_\_GI\_}, \pat{\_\_libc\_}, \pat{\_\_memmove\_}, \pat{\_\_memset\_},
+\pat{memcpy}, \pat{memmove}, \pat{memset}, \pat{\_\_clock\_} \\
+\hline
+
+Kernel\_syscall &
+\pat{do\_syscall\_64}, \pat{syscall\_enter\_from\_user\_mode},
+\pat{syscall\_exit\_to\_user\_mode}, \pat{syscall\_return\_via\_sysret},
+\pat{entry\_SYSCALL\_64}, \pat{\_\_irqentry\_text\_start},
+\pat{\_\_irqentry\_text\_end}, \pat{\_\_x64\_sys\_}, \pat{\_\_do\_sys\_},
+\pat{\_\_se\_sys\_}, \pat{syscall} \\
+\hline
+
+Kernel\_aio &
+\pat{aio\_}, \pat{io\_submit\_one} \\
+\hline
+
+Kernel\_io\_uring &
+\pat{io\_uring}, \pat{io\_submit\_sqes}, \pat{io\_submit\_flush\_completions} \\
+\hline
+
+Kernel\_nvme &
+\pat{nvme\_}, \pat{\_\_nvme\_} \\
+\hline
+
+Kernel\_block &
+\pat{blk\_mq\_}, \pat{\_\_blk\_mq\_}, \pat{blk\_account\_io\_}, \pat{blk\_add\_},
+\pat{blk\_attempt\_plug}, \pat{blk\_finish\_plug\_list},
+\pat{blk\_flush\_plug\_list}, \pat{blk\_update\_request}, \pat{blk\_stat\_add},
+\pat{blk\_queue\_}, \pat{\_\_blk\_queue\_}, \pat{blk\_start\_plug},
+\pat{blk\_throtl\_bio}, \pat{blk\_try\_enter\_queue}, \pat{blk\_add\_timer},
+\pat{blk\_cgroup\_bio\_start}, \pat{blkdev\_direct\_IO},
+\pat{blkdev\_write\_iter}, \pat{blkdev\_bio\_end\_io}, \pat{kthread\_blkcg} \\
+\hline
+
+Kernel\_bio &
+\pat{bio\_}, \pat{\_\_bio\_}, \pat{submit\_bio\_}, \pat{submit\_bio},
+\pat{guard\_bio\_eod} \\
+\hline
+
+Kernel\_irq &
+\pat{handle\_edge\_irq}, \pat{handle\_irq\_event},
+\pat{\_\_handle\_irq\_event\_percpu}, \pat{irq\_chip\_ack\_parent},
+\pat{apic\_ack\_irq}, \pat{\_\_do\_softirq}, \pat{do\_softirq},
+\pat{irq\_exit\_rcu}, \pat{irq\_enter\_rcu} \\
+\hline
+
+Kernel\_locks &
+\pat{\_raw\_spin\_lock}, \pat{\_raw\_read\_lock}, \pat{\_raw\_write\_lock},
+\pat{lock\_timer\_base}, \pat{\_raw\_spin\_unlock}, \pat{queued\_spin\_lock},
+\pat{native\_queued\_spin} \\
+\hline
+
+Kernel\_rcu &
+\pat{synchronize\_rcu}, \pat{rcu\_read\_lock}, \pat{\_\_srcu\_read\_lock},
+\pat{\_\_srcu\_read\_unlock}, \pat{rcu\_read\_unlock}, \pat{call\_rcu},
+\pat{rcu\_do\_batch} \\
+\hline
+
+Kernel\_GUP &
+\pat{follow\_page}, \pat{follow\_page\_pte}, \pat{pin\_user\_pages},
+\pat{get\_user\_pages}, \pat{\_\_gup}, \pat{unpin\_user\_page},
+\pat{\_\_unpin}, \pat{try\_grab\_compound\_head} \\
+\hline
+
+Kernel\_mm &
+\pat{\_\_get\_free\_pages}, \pat{\_\_alloc\_pages}, \pat{free\_pages},
+\pat{free\_unref\_page}, \pat{rmqueue}, \pat{free\_pcppages\_bulk},
+\pat{\_\_mod\_lruvec\_state}, \pat{\_\_mod\_node\_page\_state},
+\pat{mark\_page\_accessed}, \pat{folio\_}, \pat{\_\_folio} \\
+\hline
+
+Kernel\_timer &
+\pat{hrtimer}, \pat{\_\_hrtimer}, \pat{clockevents\_}, \pat{tick\_},
+\pat{ktime\_get}, \pat{ktime\_}, \pat{sched\_clock}, \pat{\_\_sched\_clock},
+\pat{rcu\_sched\_clock\_irq} \\
+\hline
+
+Kernel\_sched &
+\pat{\_\_schedule}, \pat{schedule}, \pat{finish\_task\_switch},
+\pat{try\_to\_wake\_up}, \pat{select\_task\_rq}, \pat{ttwu},
+\pat{dequeue\_task}, \pat{enqueue\_task} \\
+\hline
+
+Kernel\_vfs &
+\pat{vfs\_}, \pat{\_\_vfs\_}, \pat{do\_iter\_read}, \pat{do\_iter\_write},
+\pat{new\_sync\_}, \pat{kiocb}, \pat{generic\_file\_}, \pat{iomap\_},
+\pat{fsnotify}, \pat{inode\_}, \pat{filemap\_}, \pat{iomap\_dio} \\
+\hline
+
+Kernel\_slab &
+\pat{kmalloc}, \pat{\_\_kmalloc}, \pat{kfree}, \pat{kmem\_cache\_},
+\pat{\_\_slab\_}, \pat{slab\_}, \pat{mempool\_}, \pat{kmemdup} \\
+\hline
+
+\end{longtable}
+
