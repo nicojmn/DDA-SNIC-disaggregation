@@ -68,6 +68,8 @@ In the following subsections \ref{subsec:disk-throughput} and \ref{subsec:disk-l
 
 \end{table}
 
+
+\nt{Discuss that the variance is lower with SPDK, maybe you should do more than 10s?}
 \subsection{Throughput} \label{subsec:disk-throughput}
 
 % TO-DO : mention data availability on the repository
@@ -76,8 +78,9 @@ Throughput has been evaluated on disk A for different file size, block size and 
 
 
 \subsubsection{Sequential read}
+\nt{This is very dense, try to make it readable and list the main takeaways at the end}
 
-Figure \ref{fig:read-bandwidth-4K} depicts the throughput over 4 kilobytes block size. At small file size (4MB and 10MB), kernel-path engines are bottlenecked and far behind device bandwidth, while \acrshort{spdk} achieves systemically higher throughput. \acrshort{spdk} deliver up to 4.5 times higher throughput than kernel-path engines. The standard deviation of \acrshort{spdk} is also significantly lower than kernel-path engines, ranging from 313.99 kB/s to 10.7 MB/s while kernel-path engines range from 33.50 MB/s to 61.94 MB/s. At larger file size (100MB and 1GB), \acrshort{spdk} is still ahead of kernel-path engines, but the throughput remains 0.8 times higher. The standard deviation of \acrshort{spdk} is yet again significantly lower than kernel-path engines, ranging from 1.49 MB/s to 12.46 MB/s while kernel-path engines range from 41.52 MB/s to 55.04 MB/s. The results are summarized in table \ref{tab:stats-bandwidth-4K}. The reason why \acrshort{spdk} performs better than kernel-path engines is that \acrshort{spdk} bypasses the kernel and directly accesses the device, while kernel-path engines have to go through the kernel, which adds overhead. 
+Figure \ref{fig:read-bandwidth-4K} depicts the throughput over 4 kilobytes block size. At small file size (4MB and 10MB), kernel-path engines are bottlenecked and far behind device bandwidth, while \acrshort{spdk} achieves systemically higher throughput. \acrshort{spdk} deliver up to 4.5 times higher throughput than kernel-path engines. The standard deviation of \acrshort{spdk} is also significantly lower than kernel-path engines, ranging from 313.99 kB/s to 10.7 MB/s while kernel-path engines range from 33.50 MB/s to 61.94 MB/s. At larger file size (100MB and 1GB), \acrshort{spdk} is still ahead of kernel-path engines, but the throughput remains 0.8 times \nt{(1.8?)} higher. The standard deviation of \acrshort{spdk} is yet again significantly lower than kernel-path engines, ranging from 1.49 MB/s to 12.46 MB/s while kernel-path engines range from 41.52 MB/s to 55.04 MB/s. The results are summarized in table \ref{tab:stats-bandwidth-4K}. The reason why \acrshort{spdk} performs better than kernel-path engines is that \acrshort{spdk} bypasses the kernel and directly accesses the device, while kernel-path engines have to go through the kernel, which adds overhead. 
 % Explain why kernel perfoms better at large file than small file.
 % Run perf 
 % Tests with multiple threads / cores
@@ -102,7 +105,7 @@ We can conclude that \acrshort{spdk} is able to achieve higher throughput for se
         \label{fig:read-bandwidth-4M}
     \end{minipage}
     
-\endq{figure}
+\end{figure}
 
 \subsubsection{Sequential write}
 
@@ -136,6 +139,7 @@ While some configurations are able to exceed the vendor theoretical speed of 6.5
     TO-DO
 
 
+\nt{Expland the discussion}
 \section{NVMe-over-Fabrics performances}
 
     In this section we evaluate the throughput and latency of NVMe-over-Fabrics with Linux kernel on disk A. The tests evaluate both \acrshort{tcp} and \acrshort{rdma} transport. The tests are made with \texttt{\acrshort{fio}} \cite{noauthor_kernelgitaxboefiogit_nodate} with \texttt{io\_uring} engine. Queue depth is fixed to 64.
