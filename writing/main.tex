@@ -1,4 +1,5 @@
 % EPL master thesis covers template
+\PassOptionsToPackage{svgnames}{xcolor}
 \documentclass{template/EPL-master-thesis-covers-EN}
 \usepackage{fancyhdr}
 \usepackage{tabularx}
@@ -77,6 +78,15 @@
 \years{2025--2026}
 
 \newcommand{\authcite}[1]{\citeauthor{#1} \cite{#1}}
+% Inline review comments from Nikita: \nt{text}
+% Set \showcommentsfalse to hide all comments in the final version
+\newif\ifshowcomments
+\showcommentstrue
+\definecolor{cmtcolor}{HTML}{C0392B}
+\newtcbox{\cmtbadge}{on line, colback=cmtcolor, colframe=cmtcolor,
+    coltext=white, fontupper=\sffamily\bfseries\scriptsize,
+    arc=3pt, boxrule=0pt, boxsep=0pt, left=3pt, right=3pt, top=1.5pt, bottom=1.5pt}
+\newcommand{\nt}[1]{\ifshowcomments\cmtbadge{NT}\,{\color{cmtcolor}\sffamily\small\itshape #1}\fi}
 \makeglossaries
 \input{acronyms.tex}
 \bibliography{biblio.bib}

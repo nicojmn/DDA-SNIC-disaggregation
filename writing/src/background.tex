@@ -6,11 +6,11 @@ unresolved challenges that we aim to solve in this thesis.
 \section{Overview of concepts and definitions}
 
 Hardware is evolving, notably through the transition from hard disk drives to \acrfull{ssd} devices and the decreasing cost of RAM.
-These trends have enabled researchers and companies to explore new approaches to \acrfull{hpc}. Modern \acrshort{ssd}s use the \acrfull{nvme} protocol, a low-latency, high-throughput interface designed for flash storage. \acrshort{nvme} devices can be accessed over the network using \acrfull{nvmeof}, which extends the \acrlong{nvme} command set to support network fabrics (smartNICs, \dots) \cite{noauthor_nvme_2021, noauthor_what_nodate, guz_nvme-over-fabrics_2017}. Such advancements made it possible to design new architecture designs, such as disaggregated datacenters. 
+These trends have enabled researchers and companies to explore new approaches to \acrfull{hpc}. Modern \acrshort{ssd}s use the \acrfull{nvme} protocol, a low-latency, high-throughput interface designed for flash storage. \acrshort{nvme} devices can be accessed over the network using \acrfull{nvmeof}, which extends the \acrlong{nvme} command set to support network fabrics \nt{what is a smartNIC? :d} (smartNICs, \dots) \cite{noauthor_nvme_2021, noauthor_what_nodate, guz_nvme-over-fabrics_2017}. Such advancements made it possible to design new architecture designs, such as disaggregated datacenters.
 
 This thesis uses \textit{disaggregation} to denote an architecture in which hardware resources such as compute, memory,
 accelerators, and storage are split into pools (or nodes) interconnected through a high-speed network. This design allows
-resources to be allocated on demand, improving utilization and availability. Two levels are commonly distinguished.
+resources to be allocated on demand, improving utilization and availability. Two levels are commonly distinguished. \nt{Need more citations here}
 \textit{Partial disaggregation} separates storage from compute and memory, which remain integrated together; this level has
 already been widely implemented since the early 2020s. \textit{Full disaggregation} groups each resource type into dedicated
 clusters that communicate over the network. \cite{lin_disaggregated_2020}. Figures \ref{fig:partial-disaggregation} and \ref{fig:full-disaggregation} illustrate these two levels of disaggregation.
@@ -32,15 +32,18 @@ clusters that communicate over the network. \cite{lin_disaggregated_2020}. Figur
 	\end{minipage}
 \end{figure}
 
+\nt{Figures too small}
+
 High-speed network communication is a critical aspect of disaggregated architectures. \acrfull{rdma} \cite{rdma_rfc} \cite{rdma_consortium} is a protocol that allows one computer to access memory on another computer without CPU involvement, providing high throughput and low latency. \acrfull{roce} \cite{roce_nvidia_docs} is a variant of \acrshort{rdma} that operates over Ethernet networks, making it more widely compatible with existing infrastructure.
+~\nt{If we don't use it over Ethernet, what do we use it over then?}
 
-
-Writing efficient storage applications involves understanding the role of \acrfull{spdk}. \acrshort{spdk} is a set of tools and libraries for building high-performance storage applications, particularly those that interact with \acrshort{nvme} devices. It provides a user-space driver that bypasses the kernel, allowing for lower latency and higher throughput compared to traditional kernel-based drivers \cite{noauthor_storage_nodate}. This development kit will be used in this thesis to implement and evaluate our proposed solutions, as detailed in the next chapters.
+Writing efficient storage applications involves understanding the role of \acrfull{spdk}~\nt{is SPDK actually used in practice, need more citations here}. \acrshort{spdk} is a set of tools and libraries for building high-performance storage applications, particularly those that interact with \acrshort{nvme} devices. It provides a user-space driver that bypasses the kernel, allowing for lower latency and higher throughput compared to traditional kernel-based drivers \cite{noauthor_storage_nodate}. This development kit will be used in this thesis to implement and evaluate our proposed solutions, as detailed in the next chapters.
+~\nt{Need more details about how SPDK works and why is it better that the Kernel, in which case is it better}
 
 
 \begin{draftbox}
 	Sections below (until end of chapter) are draft notes and need to be rewritten and structured.
-	TODOs : 
+	TODOs :
 	\begin{itemize}
 		\item Rewrite and structure improvements
 		\item Table of comparison of solutions
@@ -56,6 +59,8 @@ Architectural challenges can be grouped into two categories:
 	\item Limitations of traditional monolithic servers, which motivate the transition toward disaggregated architectures.
 	\item New challenges introduced by disaggregation, which break assumptions commonly made in earlier systems research and require new design approaches.
 \end{itemize}
+
+\nt{I would focus more on your topic and what you are trying to solve}
 
 \subsection{Monolithic challenges}
 
@@ -94,10 +99,13 @@ to be mentioned.
 
 \subsection{Split stacks}
 
+\nt{Should be more high-level there, you need to explain the ideas}
+\nt{I would add a diagram here}
+
 Split stacks are networking stacks divided in several planes, each one optimized for a specific task. IO-TCP from
 \authcite{kim_rearchitecting_2023} separate the traditional Linux \acrshort{tcp} stack into a stack running on the host \acrshort{cpu}, performing
 control operations, and thus called the control plane. Such operations are complex and benefits from features of the \acrfull{cisc} \acrshort{cpu}
-(for example branch prediction, vectorized instructions, …). The host stack extends the mTCP \cite{jeong_mtcp_2014} API with methods to offload
+(for example branch prediction, vectorized instructions, …)~\nt{Pretty sure ARM also has those now :d}. The host stack extends the mTCP \cite{jeong_mtcp_2014} API with methods to offload
 file opening, writing, and closing, such that applications have the most minimal changes to do in order to run itself on IO-TCP.
 
 The data plane handles all operations related to data packet preparation and transfer. These operations are simpler in comparison
@@ -106,6 +114,7 @@ usage of the smartNIC. File and disk \acrfull{io} are offloaded to otherwise it 
 Data plane operations are virtually performed and enable a mechanism of SEND / ECHO which translate in multiple \acrfull{mtu} packets
 transfer.
 
+\nt{This is not detailed enough, either go deeper or remov this part}
 Many difficulties due to the split introduce themselves, like \acrfull{rtt} measurement, retransmission, and error handling, but are
 essentially resolved with the set of commands provided by the implementation.
 
@@ -120,7 +129,7 @@ on the host-side \acrfull{fs} isn't propagated to the smartNIC stack.
 % -> Distributed FS ?
 
 Another problem is that file reading on \acrshort{nvme} disks is done with direct \acrshort{io} on a regular ext4 file system. \acrshort{spdk} reaches the best
-performance, but support for file system isn't very developed for now.
+performance, but support for file system isn't very developed for now.~\nt{Citation here}
 
 Next, with a smaller amount of connection (typically < 4), Linux \acrshort{tcp} stack outperforms IO-TCP by over 1.5 times.
 
