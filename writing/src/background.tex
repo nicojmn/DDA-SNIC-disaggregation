@@ -3,6 +3,8 @@ the main concepts and definitions used in the literature, then we will review th
 architectural challenges and solutions proposed by researchers. Finally, we will list some
 unresolved challenges that we aim to solve in this thesis.
 
+~\nt{What is a SmartNIC, how does it fit in a disagragated architecture?}
+
 \section{Overview of concepts and definitions}
 
 High-performance disaggregated storage rely on a tightly coupled pipeline bridging storage media, network interfaces and protocols, and specialized software stacks. To understand the challenges and solutions proposed in the literature, it is important to first define the main concepts layer by layer.
@@ -71,6 +73,8 @@ Architectural challenges can be grouped into two categories:
 	\item New challenges introduced by disaggregation, which break assumptions commonly made in earlier systems research and require new design approaches.
 \end{itemize}
 
+\nt{This is too short and it lacks paper citations}
+
 \subsection{Monolithic challenges}
 
 The main limitation of \acrfull{ma} is \textbf{resource stranding}. When one resource is exhausted (for example, memory), other resources on the same server may remain underutilized, leading to waste.
@@ -83,7 +87,7 @@ Finally, hardware replacement and upgrades in \acrfull{ma} often require costly 
 
 In disaggregated architecture (\acrfull{da}), the network becomes the central communication path between resource clusters. This creates strict latency and bandwidth requirements: \acrshort{cpu}-storage communication typically tolerates millisecond-scale delays, whereas \acrshort{cpu}-memory communication requires nanosecond-scale delays (around 100 ns) \cite{lin_disaggregated_2020}.
 
-Current network stacks also expose strong flexibility-performance trade-offs. \acrshort{rdma} and \acrfull{roce} offer high performance but limited flexibility due to hardware coupling. In addition, \acrshort{rdma} can suffer from head-of-line blocking, congestion, and vendor lock-in because its requirements are not always satisfied by commodity hardware. By contrast, Linux \acrshort{tcp} is more flexible but delivers lower performance and less efficient \acrshort{cpu} utilization \cite{skiadopoulos_high-throughput_2024}.
+Current network stacks also expose strong flexibility-performance trade-offs.~\nt{Explain a bit what is RDMA and what is RoCE} \acrshort{rdma} and \acrfull{roce} offer high performance but limited flexibility due to hardware coupling. In addition, \acrshort{rdma} can suffer from head-of-line blocking, congestion, and vendor lock-in because its requirements are not always satisfied by commodity hardware. By contrast, Linux \acrshort{tcp} is more flexible~\nt{This is too vague} but delivers lower performance and less efficient \acrshort{cpu} utilization \cite{skiadopoulos_high-throughput_2024}.
 
 
 \section{State-of-the-art designs and solutions} \label{sec:sota}
@@ -94,9 +98,12 @@ Current network stacks also expose strong flexibility-performance trade-offs. \a
 %.2. Mechanism : split stack
 % 3. Zero-copy data path
 
-Standard network stacks like Linux \acrshort{tcp} force all operations to be executed on a single plane on the host \acrshort{cpu}, causing performance bottlenecks and resource contention. To address this, researchers have proposed split stack architectures that separate control and data operations. This decoupling allows stateful control plane operations to be managed by the \acrshort{cpu}, while stateless data plane operations can be offloaded to hardware accelerators, enabling zero-copy mechanisms. The term \textit{zero-copy} refers to data transfers between devices without requiring data replication by the CPU, thereby avoiding redundant copies and reducing CPU usage.
+~\nt{Discuss how decoupling the stack helps for scalability maybe? Need to fit better in the disagragation discussion}
+Standard network stacks like Linux \acrshort{tcp} force all operations to be executed on a single plane on the host \acrshort{cpu}, causing performance bottlenecks and resource contention.~\nt{sources? Claim should be backed up} To address this, researchers have proposed split stack architectures that separate control and data operations. This decoupling allows stateful control plane operations to be managed by the \acrshort{cpu}, while stateless data plane operations can be offloaded to hardware accelerators, enabling zero-copy mechanisms.~\nt{Aren't we mixing zero-copy and split stack here?} The term \textit{zero-copy} refers to data transfers between devices without requiring data replication by the CPU, thereby avoiding redundant copies and reducing CPU usage.
 
 Recent state-of-the-art research uses this design to solve encountered bottlenecks rather than offloading every operation. A common design is to separate control operations from data operations. This is the case for \textbf{IO-TCP} \cite{kim_rearchitecting_2023}, a \acrshort{http} / \acrshort{tls} web content delivery system which splits \textit{mTCP} \cite{jeong_mtcp_2014}, a userspace stack. The control plane is responsible for connection management, congestion control, and retransmission. It runs on the host \acrshort{cpu}, while the data plane is responsible for packet preparation and transfer, running on the smartNIC. This design prevents disk \acrshort{io} pollution in the \acrshort{cpu} cache and reduces contention, notably on the \acrfull{llc} miss rate which is improved by 27 \%. This allows a single core to saturate several \acrshort{nvme} disks at 77.4 Gbps, whereas Linux and Atlas \cite{marinos_diskcryptnet_2017} (a video streaming FreeBSD server) achieve roughly half that throughput even when using 10 cores. Network performance also benefits from reduced \acrshort{rtt} and improved throughput.
+
+\nt{This could be more high-level, too many words/concepts are not explained}
 
 While IO-TCP addresses host-centric bottlenecks with a specialized userspace implementation, \textbf{ZeroNIC} \cite{skiadopoulos_high-throughput_2024} focuses on flexibility and generality for host networking. Rather than modifying a specific stack, ZeroNIC physically separates the control and data planes to achieve end-to-end zero-copy, and can run on host userspace, kernel, or on an accelerator. Prior approaches required strict page alignment, page remapping, or custom \acrfull{api} to avoid data copies. ZeroNIC, on the other hand, achieves zero-copy without these constraints by delegating payload placement to the \acrshort{nic} hardware. Utilizing on-NIC data structures such as memory segments and flow tables, the hardware calculates memory offsets and \acrshort{dma}s payloads directly to applications (which can reside on \acrshort{cpu}, \acrshort{dpu}, or \acrshort{fpga}). The software control plane only processes splitted headers, maintaining reliable protocol semantics, without ever touching the payload. This approach allows a single core to saturate a 100 Gbps link with a single TCP flow, while using only 17\% of a single \acrshort{cpu}.
 
@@ -105,6 +112,8 @@ While IO-TCP addresses host-centric bottlenecks with a specialized userspace imp
 Beyond network stack offloading, zero-copy mechanisms can also be applied to storage operations. Concerning \acrshort{nvme} storage, \textbf{Scalio} \cite{sun_scalio_2025} focused on \acrshort{nvmeof} target offloading which extends the zero-copy mechanism, for storage applications. Scalio is a scalable disaggregated key-value store that transfers directly to the \acrfull{dpu}'s \acrfull{hca} via \acrshort{p2pdma}. This extends zero-copy to entirely bypass the \acrshort{dpu} cores for read operations, creating a new kind of zero-copy data path who drops \acrshort{cpu} usage to 0\% for these operations, and improves speedup over previous solutions like LEED\cite{guo_leed_2023} and Ditto\cite{shen_ditto_2023}. Scalio also implements batched write operations, which retain write operations until an arbitrary threshold is achieved. All these operations are then run consecutively while a group commit ensures atomicity of operations, improving throughput and reducing the accelerator \acrshort{cpu} load.
 
 
+\nt{Good}
+
 \subsection{Open challenges}
 
 While state-of-the-art solutions sucessfully mitigate host \acrshort{cpu} bottlenecks throught hardware offloading and split-stack architectures, they still face several limitations. These limitations include storage stack limitations, scalability and latency trade-offs.
@@ -112,9 +121,11 @@ While state-of-the-art solutions sucessfully mitigate host \acrshort{cpu} bottle
 \subsubsection{Storage stack overheads}
 
 Designs like IO-TCP decouple the network control and data planes, but still rely on traditional file systems like ext4 for storage operations. By relying on direct \acrshort{io} on ext4, the host is forced to maintain file system state. This design assume a static environment where files do not change during content delivery, which is not always the case in real-world scenarios. Any changes made to the file system on the host side are not propagated to the smartNIC stack, leading to potential inconsistencies and stale data being served. Furthermore, the overhead of maintaining this file system cause IO-TCP to underperform compared to Linux \acrshort{tcp} for a small number of connections (typically less than 4), where Linux achieves over 1.5 times the throughput of IO-TCP.
-Briding this gap by replacing kernel-based file systems with user-space storage stacks like \acrshort{spdk} is necessary to fully leverage the benefits of \acrshort{nvme} performance, but remains challenging due to the lack of mature file system support and abstractions in polled-mode user-space environments.
+Briding this gap by replacing kernel-based file systems with user-space storage stacks like \acrshort{spdk}~\nt{Are you sure that SPDK will necessarly help there? :d} is necessary to fully leverage the benefits of \acrshort{nvme} performance, but remains challenging due to the lack of mature file system support and abstractions in polled-mode user-space environments.
 
 \subsubsection{Hardware constraints in zero-copy}
+
+\nt{This is not clear, they do one queue per connection right? So this limits the number of concurent conncections}
 
 General-purpose end-to-end zero-copy mechanisms, like those implemented in ZeroNIC, successfully bypass the host \acrshort{cpu} but are constrained by the hardware capabilities of the underlying network interface. The number of zero-copy flows that can be supported is strictly bound by the number of hardware queues available on the \acrshort{nic}, because payload placement is delegated to the hardware, thus requiring the flow tables and memory segments discussed earlier. Moreover, the prototype implementation of ZeroNIC frequently encountered \acrshort{pcie} bandwidth limitations when transferring data to \acrshort{gpu}, shifting the bottleneck from \acrshort{cpu}
 to the \acrshort{pcie} bus.
@@ -149,12 +160,16 @@ Extending zero-copy mechanisms to storage target operations introduces severe la
 
 \section{Objectives}
 
+\nt{Double check that the SPDK implementation is actually done, if not change the text below :d}
+
 This master's thesis focus on partial disaggregation. Our goal is to demonstrate that \acrshort{spdk} can both be used to maximize \acrshort{nvme} throughput capability, and serve as a building block for file systems operations in disaggregated storage solutions. To do so, we first evaluate the performance of \acrshort{spdk} in a disaggregated architecture, then we adapt the \textbf{IO-TCP solution} to use \acrshort{spdk}-based file systems operations instead of direct \acrshort{io} on a regular ext4 file system. Finally, we evaluate the performance of our solution in terms of throughput and latency, and compare it to existing solutions.
 
 The core contribution is to modify the \acrshort{nic} stack of IO-TCP to use \acrshort{spdk} \acrlong{bdev} and blobstore layers to build more optimized file system operations. This allow us to fully exploit \acrshort{pcie} \acrshort{nvme} by bypassing the kernel block layer, with better efficiency in terms of \acrshort{cpu} usage and throughput, while maintaining the benefits of a split-stack architecture.
 
 Choosing IO-TCP as a base for our work is motivated by several factors. First, IO-TCP and \acrshort{spdk} operates in userspace, allowing to share memory domains (specifically \acrshort{dpdk} hugepages) and avoid kernel context switches. Second, as noted in IO-TCP paper, ext4 is suboptimal for their use case, and that \acrshort{spdk} would be a better alternative. Third, IO-TCP's purpose is disk-bound web content delivery, whereas other solutions like ZeroNIC are general-purpose networking solutions. Finally, \acrshort{spdk} userspace polling mode integrate well with IO-TCP's userspace stack (mTCP), allowing for an unified kernel-bypass architecture. 
 
+
+\nt{Should be it's own section, not 2.5}
 
 \section{IO-TCP implementation analysis}
 
