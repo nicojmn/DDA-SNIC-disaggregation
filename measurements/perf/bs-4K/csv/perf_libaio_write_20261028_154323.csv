@@ -1,0 +1,7 @@
+Kernel_io;44.027228
+Kernel_core;18.816257
+fio_core;16.657528
+Kernel_syscall;12.373528
+libaio_userspace;3.872350
+fio_engine;2.121677
+Libc;1.361053
