@@ -78,10 +78,6 @@ Figure \ref{fig:read-bandwidth-4K} depicts the throughput over 4 kilobytes block
 % Run perf 
 % Tests with multiple threads / cores
 
-Looking at figure \ref{fig:read-bandwidth-4M} which illustrates throughput with 4 megabytes block size, we can observe that througput of all engines increase compared to 4kB block size. \acrshort{spdk} is consistent for all file size, with an average throughput of 6.73 GB/s (maximum achived is 6.75 GB/s). This throughput is close to the vendor theoretical speed of 7 GB/s. Kernel-path engines are still bottlenecked at small file size (4MB and 10MB), with an average throughput of respectively 1.53 GB/s and 2.01 GB/s, thus making \acrshort{spdk} 4.4 times faster than kernel-path engines. At larger file size (100MB and 1GB), kernel-path engines are able to achieve a mean throughput of 3.31 GB/s and 5.43 GB/s respectively, thus making \acrshort{spdk} 1.24 to 2.03 times faster than kernel-path engines. Standard deviation of \acrshort{spdk} is also significantly lower than kernel-path engines, ranging from 11.97 MB/s to 16.74 MB/s while kernel-path engines range from 96.58 MB/s to 218.24 MB/s. The results are summarized in table \ref{tab:stats-bandwidth-4M}.
-
-We can conclude that \acrshort{spdk} is able to achieve higher throughput for sequential read operations with lower standard deviation than kernel-path engines, especially at small file size. It also follows the same order of magnitude for small file size regardless of block size, and is able to achieve close to vendor theoretical speed with large block size.
-
 \begin{figure}[htbp]
     \centering
     \begin{minipage}{0.495\columnwidth}
@@ -97,12 +93,16 @@ We can conclude that \acrshort{spdk} is able to achieve higher throughput for se
         \caption{Throughput of sequential read operations with 4MB block size}
         \label{fig:read-bandwidth-4M}
     \end{minipage}
-    
 \end{figure}
+
+Looking at figure \ref{fig:read-bandwidth-4M} which illustrates throughput with 4 megabytes block size, we can observe that througput of all engines increase compared to 4kB block size. \acrshort{spdk} is consistent for all file size, with an average throughput of 6.73 GB/s (maximum achived is 6.75 GB/s). This throughput is close to the vendor theoretical speed of 7 GB/s. Kernel-path engines are still bottlenecked at small file size (4MB and 10MB), with an average throughput of respectively 1.53 GB/s and 2.01 GB/s, thus making \acrshort{spdk} 4.4 times faster than kernel-path engines. At larger file size (100MB and 1GB), kernel-path engines are able to achieve a mean throughput of 3.31 GB/s and 5.43 GB/s respectively, thus making \acrshort{spdk} 1.24 to 2.03 times faster than kernel-path engines. Standard deviation of \acrshort{spdk} is also significantly lower than kernel-path engines, ranging from 11.97 MB/s to 16.74 MB/s while kernel-path engines range from 96.58 MB/s to 218.24 MB/s. The results are summarized in table \ref{tab:stats-bandwidth-4M}.
+
+We can conclude that \acrshort{spdk} is able to achieve higher throughput for sequential read operations with lower standard deviation than kernel-path engines, especially at small file size. It also follows the same order of magnitude for small file size regardless of block size, and is able to achieve close to vendor theoretical speed with large block size.
+
 
 \subsubsection{Sequential write}
 
-For sequential write with block size of 4 kB (figure \ref{fig:write-bandwidth-4K}), we can observe that \acrshort{spdk} is more stable in its mean output, reaching 6.25 GB/s with standard deviation of 35.09 MB/s to 59.09 MB/s. Kernel-path engines are capped at 2.1 GB/s in their best case, with standard deviation of 35.37 MB/s to 353.55 MB/s.
+For sequential write with block size of 4 kB (figure \ref{fig:write-bandwidth-4K}), we can observe that \acrshort{spdk} is more stable in its mean output, reaching 6.25 GB/s with standard deviation of 35.09 MB/s to 59.09 MB/s. Kernel-path engines are capped at 2.1 GB/s in their best case, with standard deviation of 35.37 MB/s to 353.55 MB/s. Unlike read operations, write operations are bounded by the device NAND program time rather than \acrshort{pcie} bandwidth, so these numbers must also account eventual SLC caching. The results are summarized in table \ref{tab:stats-write-bandwidth-4K}.
 
 \begin{figure}[htbp]
     \centering
@@ -121,18 +121,112 @@ For sequential write with block size of 4 kB (figure \ref{fig:write-bandwidth-4K
     \end{minipage}
 \end{figure}
 
+Figure \ref{fig:write-bandwidth-4M} shows the throughput of sequential write operations with 4MB block size. At this block size, \acrshort{spdk} has an higher average throughput of 6.73 GB/s with standard deviation of 11.97 MB/s to 16.74 MB/s, while kernel-path engines are capped at 5.43 GB/s with standard deviation of 96.58 MB/s to 595.86 MB/s.
+
 While some configurations are able to exceed the vendor theoretical speed of 6.5 GB/s, caution should be taken as even if not specified by the vendor, the disk can use a dynamic \acrshort{pslc} write cache to achieve higher throughput. This is why we ran a time-based test of 300 seconds and ramp time of 30 seconds to evict eventual SLC caching in subsection \ref{subsec:slc-caching}.
 
-
-\subsubsection{SLC cache} \label{subsec:slc-caching}
+\subsubsection{Random read and write}
 
     TO-DO
 
+\subsection{Cost per I/O operation}
+
+    Previous results show that kernel-path engines are impacted by the block size. We can compute the \acrfull{iops}  by dividing the throughput by the block size. Below is a table summarizing the average \acrshort{iops} for previous tests. The results show that \acrshort{spdk} is able to achieve higher \acrshort{iops} than kernel-path engines, especially at small block size. This is due to the fact that \acrshort{spdk} bypasses the kernel and directly accesses the device, while kernel-path engines have to go through the kernel, which adds overhead.
+
+    \begin{table}[htbp]
+        \centering
+        \caption{Average \acrshort{iops} for all operations with 4kB and 4MB block size}
+        \label{tab:stats-iops}
+            \begin{tabularx}{\columnwidth}{@{}l l X X X@{}}
+            \toprule
+            \textbf{Block size} & \textbf{Operations} & \texttt{io\_uring} & \texttt{libaio} & \texttt{spdk\_bdev}\\
+            \midrule
+            \textbf{4kB} & Sequential Read & 397.03 kIOPS & 374.2 kIOPS & 1.56 MIOPS \\
+            \textbf{4kB} & Random Read & 382.62 kIOPS & 355.03 kIOPS & 742.92 kIOPS \\
+            \textbf{4kB} & Sequential Write & 397.03 kIOPS & 374.2 kIOPS & 1.56 MIOPS \\
+            \textbf{4kB} & Random Write & 361.5 kIOPS & 339.55 kIOPS & 590.92 kIOPS \\
+            \midrule
+            \textbf{4MB} & Sequential Read & 384.53 IOPS & 362.57 IOPS & 753.92 kIOPS \\
+            \textbf{4MB} & Random Read & 822.49 IOPS & 834.12 IOPS & 1.46 kIOPS \\
+            \textbf{4MB} & Sequential Write & 750.63 IOPS & 767.51 IOPS & 1.68 kIOPS \\
+            \textbf{4MB} & Random Write & 750.63 IOPS & 767.51 IOPS & 1.68 kIOPS \\
+            \bottomrule
+            \end{tabularx}
+    \end{table}
+
+    % \begin{figure}[htbp]
+    %     \centering
+    %     \begin{minipage}{0.495\columnwidth}
+    %         \centering
+    %         \includegraphics[width=\linewidth]{../measurements/perf/pdf/perf_libaio_write_20261028_154323.pdf}
+    %         \caption{Perf of sequential write operations with 4kB block size and 1MB file size}
+    %         \label{fig:perf-write-4k-1M}
+    %     \end{minipage}
+    %     \hfill
+    %     \begin{minipage}{0.495\columnwidth}
+    %         \centering
+    %         \includegraphics[width=\linewidth]{../measurements/perf/pdf/perf_libaio_4_write_20261028_171603.pdf}
+    %         \caption{Throughput of sequential write operations with 4kB block size and 4MB file size}
+    %         \label{fig:perf-write-4k-4M}
+    %     \end{minipage}
+    % \end{figure}
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=\columnwidth]{../measurements/perf/pdf/perf_libaio_write_20261028_154323.pdf}
+        \caption{Perf of sequential write operations with 4kB block size and 1MB file size with \texttt{libaio}}
+        \label{fig:perf-write-libaio-4k-1M}
+    \end{figure}
+
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=\columnwidth]{../measurements/perf/pdf/perf_libaio_4_write_20261028_171603.pdf}
+        \caption{Perf of sequential write operations with 4kB block size and 4MB file size with \texttt{libaio}}
+        \label{fig:perf-write-libaio-4k-4M}
+    \end{figure}
+
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=\columnwidth]{../measurements/perf/bs-4K/pdf/perf_spdk_bdev_4_write_20261104_182456.pdf}
+        \caption{Perf of sequential write operations with 4kB block size and 4MB file size with SPDK}
+        \label{fig:perf-write-spdk-4k-4M}
+    \end{figure}
+
+    
+    For example, for sequential read operations with 4kB block size, \acrshort{spdk} achieves on average 753.92 k\acrshort{iops} while kernel-path engines achieve on average 362.57 k\acrshort{iops} for \texttt{libaio} and 384.53 k\acrshort{iops} for \texttt{io\_uring}, nearly 2 times less. For 4MB block size, \acrshort{spdk} got on average 1.5 K\acrshort{iops} while \texttt{io\_uring} got 880.83 \acrshort{iops} and \texttt{libaio} got 878.34 \acrshort{iops}, nearly 1.7 times less.
+    
+    Figures \ref{fig:perf-write-4k-1M} and \ref{fig:perf-write-4k-4M} show the \texttt{perf} of sequential write operations with 4kB block size and 1MB or 4MB file size respectively. Up to 20 \% of the CPU time is spent on system calls. Detailed classification of the CPU time is available in table \ref{tab:perf-categories}.
+
+\subsection{SLC cache} \label{subsec:slc-caching}
+
+    TO-DO
+
+    \begin{figure}[htbp]
+        \centering
+        \begin{minipage}{0.495\columnwidth}
+            \centering
+            \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/slc/graphs/write-IO_BYTES.pdf}
+            \caption{Throughput of sequential write operations with 4kB block size and 1MB file size}
+            \label{fig:slc-write-iobytes}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.495\columnwidth}
+            \centering
+            \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/slc/graphs/write-BANDWIDTH.pdf}
+            \caption{Throughput of sequential write operations with 4kB block size and 4MB file size}
+            \label{fig:slc-write-bandwidth}
+        \end{minipage}
+    \end{figure}
+
 \subsection{Latency} \label{subsec:disk-latency}
+
     TO-DO
 
 
 \nt{Expland the discussion}
+\subsection{Multiple cores} \label{subsec:disk-multicore}
+
+    TO-DO
+    
 \section{NVMe-over-Fabrics performances}
 
     In this section we evaluate the throughput and latency of NVMe-over-Fabrics with Linux kernel on disk A. The tests evaluate both \acrshort{tcp} and \acrshort{rdma} transport. The tests are made with \texttt{\acrshort{fio}} \cite{noauthor_kernelgitaxboefiogit_nodate} with \texttt{io\_uring} engine. Queue depth is fixed to 64.
