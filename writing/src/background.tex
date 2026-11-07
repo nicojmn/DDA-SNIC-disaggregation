@@ -132,7 +132,6 @@ While IO-TCP addresses host-centric bottlenecks with a specialized userspace imp
 
 Beyond network stack offloading, zero-copy mechanisms can also be applied to storage operations. Concerning \acrshort{nvme} storage, \textbf{Scalio} \cite{sun_scalio_2025} focused on \acrshort{nvmeof} target offloading which extends the zero-copy mechanism, for storage applications. Scalio is a scalable disaggregated key-value store that transfers directly to the \acrfull{dpu}'s \acrfull{hca} via \acrshort{p2pdma}. This extends zero-copy to entirely bypass the \acrshort{dpu} cores for read operations, creating a new kind of zero-copy data path who drops \acrshort{cpu} usage to 0\% for these operations, and improves speedup over previous solutions like LEED\cite{guo_leed_2023} and Ditto\cite{shen_ditto_2023}. Scalio also implements batched write operations, which retain write operations until an arbitrary threshold is achieved. All these operations are then run consecutively while a group commit ensures atomicity of operations, improving throughput and reducing the accelerator \acrshort{cpu} load.
 
-
 \nt{Good}
 
 \subsection{Open challenges}
