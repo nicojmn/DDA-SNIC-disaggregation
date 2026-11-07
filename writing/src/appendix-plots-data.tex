@@ -1,0 +1,281 @@
+\section{Disk performances}
+
+\subsection{Read operations}
+
+\begin{table}[H]
+\centering
+\caption{Statistical summary of figure \ref{fig:read-bandwidth-4K} : read throughput with 4kB block size}
+\label{tab:stats-bandwidth-4K}
+% \renewcommand{\arraystretch}{1.0}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}l l c c c c c@{}}
+\toprule
+\textbf{Engine} & \textbf{Size (MB)} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Median} & \textbf{Max} \\
+\midrule
+\midrule
+\textbf{io\_uring} & 4 & 584.21MB/s & 33.50MB/s & 524.29MB/s & 599.19MB/s & 599.19MB/s \\
+\textbf{io\_uring} & 10 & 956.43MB/s & 61.94MB/s & 873.81MB/s & 953.25MB/s & 1.05GB/s \\
+\textbf{io\_uring} & 100 & 2.01GB/s & 41.52MB/s & 1.94GB/s & 2.02GB/s & 2.06GB/s \\
+\textbf{io\_uring} & 1024 & 2.38GB/s & 55.04MB/s & 2.30GB/s & 2.36GB/s & 2.45GB/s \\
+\midrule
+\textbf{libaio} & 4 & 584.21MB/s & 33.50MB/s & 524.29MB/s & 599.19MB/s & 599.19MB/s \\
+\textbf{libaio} & 10 & 905.59MB/s & 43.51MB/s & 873.81MB/s & 873.81MB/s & 953.25MB/s \\
+\textbf{libaio} & 100 & 1.89GB/s & 45.43MB/s & 1.84GB/s & 1.91GB/s & 1.94GB/s \\
+\textbf{libaio} & 1024 & 2.25GB/s & 13.68MB/s & 2.24GB/s & 2.25GB/s & 2.27GB/s \\
+\midrule
+\textbf{spdk\_bdev} & 4 & 2.63GB/s & 10.07MB/s & 2.62GB/s & 2.62GB/s & 2.64GB/s \\
+\textbf{spdk\_bdev} & 10 & 2.98GB/s & 313.99kB/s & 2.98GB/s & 2.98GB/s & 2.98GB/s \\
+\textbf{spdk\_bdev} & 100 & 2.51GB/s & 1.49MB/s & 2.51GB/s & 2.51GB/s & 2.51GB/s \\
+\textbf{spdk\_bdev} & 1024 & 3.00GB/s & 12.46MB/s & 2.99GB/s & 3.01GB/s & 3.01GB/s \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Statistical summary of figure \ref{fig:read-bandwidth-4M} : read throughput with 4MB block size}
+\label{tab:stats-bandwidth-4M}
+% \renewcommand{\arraystretch}{1.0}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}l l c c c c c@{}}
+\toprule
+\textbf{Engine} & \textbf{Size (MB)} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Median} & \textbf{Max} \\
+\midrule
+\midrule
+\textbf{io\_uring} & 4 & 1.33GB/s & 147.37MB/s & 1.05GB/s & 1.40GB/s & 1.40GB/s \\
+\textbf{io\_uring} & 10 & 1.97GB/s & 202.60MB/s & 1.68GB/s & 2.10GB/s & 2.10GB/s \\
+\textbf{io\_uring} & 100 & 3.30GB/s & 218.24MB/s & 2.69GB/s & 3.38GB/s & 3.38GB/s \\
+\textbf{io\_uring} & 1024 & 5.41GB/s & 96.58MB/s & 5.32GB/s & 5.36GB/s & 5.56GB/s \\
+\midrule
+\textbf{libaio} & 4 & 1.53GB/s & 595.86MB/s & 262.14MB/s & 1.40GB/s & 2.10GB/s \\
+\textbf{libaio} & 10 & 2.01GB/s & 176.85MB/s & 1.68GB/s & 2.10GB/s & 2.10GB/s \\
+\textbf{libaio} & 100 & 3.31GB/s & 196.16MB/s & 2.76GB/s & 3.38GB/s & 3.38GB/s \\
+\textbf{libaio} & 1024 & 5.43GB/s & 122.58MB/s & 5.24GB/s & 5.38GB/s & 5.62GB/s \\
+\midrule
+\textbf{spdk\_bdev} & 4 & 6.73GB/s & 11.97MB/s & 6.72GB/s & 6.73GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 10 & 6.74GB/s & 12.38MB/s & 6.72GB/s & 6.74GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 100 & 6.72GB/s & 16.74MB/s & 6.70GB/s & 6.72GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 1024 & 6.73GB/s & 14.98MB/s & 6.71GB/s & 6.73GB/s & 6.75GB/s \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\subsection{Write operations}
+
+
+\begin{table}[H]
+\centering
+\caption{Statistical summary of figure \ref{fig:write-bandwidth-4K} : write throughput with 4kB block size}
+\label{tab:stats-write-bandwidth-4K}
+% \renewcommand{\arraystretch}{1.0}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}l l c c c c c@{}}
+\toprule
+\textbf{Engine} & \textbf{Size (MB)} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Median} & \textbf{Max} \\
+\midrule
+\midrule
+\textbf{io\_uring} & 4 & 1.05GB/s & 0.00B/s & 1.05GB/s & 1.05GB/s & 1.05GB/s \\
+\textbf{io\_uring} & 10 & 1.39GB/s & 102.56MB/s & 1.31GB/s & 1.31GB/s & 1.50GB/s \\
+\textbf{io\_uring} & 100 & 1.71GB/s & 165.90MB/s & 1.57GB/s & 1.61GB/s & 1.91GB/s \\
+\textbf{io\_uring} & 1024 & 2.10GB/s & 55.96MB/s & 2.03GB/s & 2.08GB/s & 2.16GB/s \\
+\midrule
+\textbf{libaio} & 4 & 608.59MB/s & 202.29MB/s & 246.72MB/s & 699.05MB/s & 699.05MB/s \\
+\textbf{libaio} & 10 & 991.38MB/s & 52.21MB/s & 953.25MB/s & 953.25MB/s & 1.05GB/s \\
+\textbf{libaio} & 100 & 1.87GB/s & 87.03MB/s & 1.78GB/s & 1.84GB/s & 1.98GB/s \\
+\textbf{libaio} & 1024 & 2.02GB/s & 35.20MB/s & 1.98GB/s & 2.01GB/s & 2.07GB/s \\
+\midrule
+\textbf{spdk\_bdev} & 4 & 5.16GB/s & 2.48GB/s & 731.38MB/s & 6.24GB/s & 6.34GB/s \\
+\textbf{spdk\_bdev} & 10 & 6.28GB/s & 62.16MB/s & 6.23GB/s & 6.24GB/s & 6.36GB/s \\
+\textbf{spdk\_bdev} & 100 & 6.27GB/s & 49.40MB/s & 6.23GB/s & 6.25GB/s & 6.33GB/s \\
+\textbf{spdk\_bdev} & 1024 & 6.25GB/s & 35.50MB/s & 6.19GB/s & 6.26GB/s & 6.28GB/s \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Statistical summary of figure \ref{fig:write-bandwidth-4M} : write throughput with 4MB block size}
+\label{tab:stats-write-bandwidth-4M}
+% \renewcommand{\arraystretch}{1.0}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}l l c c c c c@{}}
+\toprule
+\textbf{Engine} & \textbf{Size (MB)} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Median} & \textbf{Max} \\
+\midrule
+\midrule
+\textbf{io\_uring} & 4 & 1.33GB/s & 147.37MB/s & 1.05GB/s & 1.40GB/s & 1.40GB/s \\
+\textbf{io\_uring} & 10 & 1.97GB/s & 202.60MB/s & 1.68GB/s & 2.10GB/s & 2.10GB/s \\
+\textbf{io\_uring} & 100 & 3.30GB/s & 218.24MB/s & 2.69GB/s & 3.38GB/s & 3.38GB/s \\
+\textbf{io\_uring} & 1024 & 5.41GB/s & 96.58MB/s & 5.32GB/s & 5.36GB/s & 5.56GB/s \\
+\midrule
+\textbf{libaio} & 4 & 1.53GB/s & 595.86MB/s & 262.14MB/s & 1.40GB/s & 2.10GB/s \\
+\textbf{libaio} & 10 & 2.01GB/s & 176.85MB/s & 1.68GB/s & 2.10GB/s & 2.10GB/s \\
+\textbf{libaio} & 100 & 3.31GB/s & 196.16MB/s & 2.76GB/s & 3.38GB/s & 3.38GB/s \\
+\textbf{libaio} & 1024 & 5.43GB/s & 122.58MB/s & 5.24GB/s & 5.38GB/s & 5.62GB/s \\
+\midrule
+\textbf{spdk\_bdev} & 4 & 6.73GB/s & 11.97MB/s & 6.72GB/s & 6.73GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 10 & 6.74GB/s & 12.38MB/s & 6.72GB/s & 6.74GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 100 & 6.72GB/s & 16.74MB/s & 6.70GB/s & 6.72GB/s & 6.75GB/s \\
+\textbf{spdk\_bdev} & 1024 & 6.73GB/s & 14.98MB/s & 6.71GB/s & 6.73GB/s & 6.75GB/s \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\subsection{Perf categories}
+\newcommand{\pat}[1]{\texttt{\small #1}}
+
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\begin{longtable}{
+  >{\raggedright\arraybackslash}p{\dimexpr 0.24\columnwidth - 2\tabcolsep\relax}
+  >{\raggedright\arraybackslash}p{\dimexpr 0.76\columnwidth - 2\tabcolsep\relax}}
+\caption{Symbol taxonomy for fio engine comparison}
+\label{tab:perf-categories}\\
+\hline
+\textbf{Category} & \textbf{Symbol patterns} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Category} & \textbf{Symbol patterns} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+fio\_engine &
+\pat{fio\_libaio\_}, \pat{fio\_ioring\_} \\
+\hline
+
+liburing\_userspace &
+\pat{\_\_io\_uring}, \pat{io\_uring\_get\_sqe}, \pat{io\_uring\_prep\_},
+\pat{io\_uring\_submit}, \pat{io\_uring\_queue}, \pat{io\_uring\_peek\_batch},
+\pat{io\_uring\_wait\_cqe}, \pat{io\_uring\_cqe\_seen} \\
+\hline
+
+libaio\_userspace &
+\pat{io\_queue\_init}, \pat{\textasciicircum io\_submit\$}, \pat{\textasciicircum io\_getevents\$},
+\pat{\textasciicircum io\_destroy\$}, \pat{\textasciicircum io\_setup\$}, \pat{\textasciicircum io\_cancel\$} \\
+\hline
+
+fio\_stats &
+\pat{add\_slat\_sample}, \pat{add\_clat\_sample}, \pat{add\_lat\_sample},
+\pat{flow\_threshold\_exceeded}, \pat{in\_ramp\_period}, \pat{ramp\_period\_over},
+\pat{queue\_full}, \pat{add\_io\_u\_sample}, \pat{add\_lat\_percentile},
+\pat{stat\_add\_sample} \\
+\hline
+
+fio\_core &
+\pat{io\_u\_}, \pat{get\_io\_u}, \pat{put\_io\_u}, \pat{td\_io\_},
+\pat{td\_set\_runstate}, \pat{do\_io}, \pat{fill\_io\_u}, \pat{init\_io\_u},
+\pat{put\_file}, \pat{get\_file}, \pat{get\_next\_seq\_offset},
+\pat{io\_completed}, \pat{io\_queue\_event}, \pat{account\_io\_completion},
+\pat{lock\_file}, \pat{log\_io\_u}, \pat{fio\_backend}, \pat{fio\_file\_done},
+\pat{fio\_file\_open}, \pat{fio\_fill\_issue\_time}, \pat{fio\_}, \pat{td\_} \\
+\hline
+
+fio\_time &
+\pat{\_\_fio\_gettime}, \pat{fio\_gettime}, \pat{fio\_clock\_init},
+\pat{fio\_get\_mono\_time}, \pat{ntime\_since}, \pat{clock\_thread\_fn} \\
+\hline
+
+Libc &
+\pat{\_\_GI\_}, \pat{\_\_libc\_}, \pat{\_\_memmove\_}, \pat{\_\_memset\_},
+\pat{memcpy}, \pat{memmove}, \pat{memset}, \pat{\_\_clock\_} \\
+\hline
+
+Kernel\_syscall &
+\pat{do\_syscall\_64}, \pat{syscall\_enter\_from\_user\_mode},
+\pat{syscall\_exit\_to\_user\_mode}, \pat{syscall\_return\_via\_sysret},
+\pat{entry\_SYSCALL\_64}, \pat{\_\_irqentry\_text\_start},
+\pat{\_\_irqentry\_text\_end}, \pat{\_\_x64\_sys\_}, \pat{\_\_do\_sys\_},
+\pat{\_\_se\_sys\_}, \pat{syscall} \\
+\hline
+
+Kernel\_aio &
+\pat{aio\_}, \pat{io\_submit\_one} \\
+\hline
+
+Kernel\_io\_uring &
+\pat{io\_uring}, \pat{io\_submit\_sqes}, \pat{io\_submit\_flush\_completions} \\
+\hline
+
+Kernel\_nvme &
+\pat{nvme\_}, \pat{\_\_nvme\_} \\
+\hline
+
+Kernel\_block &
+\pat{blk\_mq\_}, \pat{\_\_blk\_mq\_}, \pat{blk\_account\_io\_}, \pat{blk\_add\_},
+\pat{blk\_attempt\_plug}, \pat{blk\_finish\_plug\_list},
+\pat{blk\_flush\_plug\_list}, \pat{blk\_update\_request}, \pat{blk\_stat\_add},
+\pat{blk\_queue\_}, \pat{\_\_blk\_queue\_}, \pat{blk\_start\_plug},
+\pat{blk\_throtl\_bio}, \pat{blk\_try\_enter\_queue}, \pat{blk\_add\_timer},
+\pat{blk\_cgroup\_bio\_start}, \pat{blkdev\_direct\_IO},
+\pat{blkdev\_write\_iter}, \pat{blkdev\_bio\_end\_io}, \pat{kthread\_blkcg} \\
+\hline
+
+Kernel\_bio &
+\pat{bio\_}, \pat{\_\_bio\_}, \pat{submit\_bio\_}, \pat{submit\_bio},
+\pat{guard\_bio\_eod} \\
+\hline
+
+Kernel\_irq &
+\pat{handle\_edge\_irq}, \pat{handle\_irq\_event},
+\pat{\_\_handle\_irq\_event\_percpu}, \pat{irq\_chip\_ack\_parent},
+\pat{apic\_ack\_irq}, \pat{\_\_do\_softirq}, \pat{do\_softirq},
+\pat{irq\_exit\_rcu}, \pat{irq\_enter\_rcu} \\
+\hline
+
+Kernel\_locks &
+\pat{\_raw\_spin\_lock}, \pat{\_raw\_read\_lock}, \pat{\_raw\_write\_lock},
+\pat{lock\_timer\_base}, \pat{\_raw\_spin\_unlock}, \pat{queued\_spin\_lock},
+\pat{native\_queued\_spin} \\
+\hline
+
+Kernel\_rcu &
+\pat{synchronize\_rcu}, \pat{rcu\_read\_lock}, \pat{\_\_srcu\_read\_lock},
+\pat{\_\_srcu\_read\_unlock}, \pat{rcu\_read\_unlock}, \pat{call\_rcu},
+\pat{rcu\_do\_batch} \\
+\hline
+
+Kernel\_GUP &
+\pat{follow\_page}, \pat{follow\_page\_pte}, \pat{pin\_user\_pages},
+\pat{get\_user\_pages}, \pat{\_\_gup}, \pat{unpin\_user\_page},
+\pat{\_\_unpin}, \pat{try\_grab\_compound\_head} \\
+\hline
+
+Kernel\_mm &
+\pat{\_\_get\_free\_pages}, \pat{\_\_alloc\_pages}, \pat{free\_pages},
+\pat{free\_unref\_page}, \pat{rmqueue}, \pat{free\_pcppages\_bulk},
+\pat{\_\_mod\_lruvec\_state}, \pat{\_\_mod\_node\_page\_state},
+\pat{mark\_page\_accessed}, \pat{folio\_}, \pat{\_\_folio} \\
+\hline
+
+Kernel\_timer &
+\pat{hrtimer}, \pat{\_\_hrtimer}, \pat{clockevents\_}, \pat{tick\_},
+\pat{ktime\_get}, \pat{ktime\_}, \pat{sched\_clock}, \pat{\_\_sched\_clock},
+\pat{rcu\_sched\_clock\_irq} \\
+\hline
+
+Kernel\_sched &
+\pat{\_\_schedule}, \pat{schedule}, \pat{finish\_task\_switch},
+\pat{try\_to\_wake\_up}, \pat{select\_task\_rq}, \pat{ttwu},
+\pat{dequeue\_task}, \pat{enqueue\_task} \\
+\hline
+
+Kernel\_vfs &
+\pat{vfs\_}, \pat{\_\_vfs\_}, \pat{do\_iter\_read}, \pat{do\_iter\_write},
+\pat{new\_sync\_}, \pat{kiocb}, \pat{generic\_file\_}, \pat{iomap\_},
+\pat{fsnotify}, \pat{inode\_}, \pat{filemap\_}, \pat{iomap\_dio} \\
+\hline
+
+Kernel\_slab &
+\pat{kmalloc}, \pat{\_\_kmalloc}, \pat{kfree}, \pat{kmem\_cache\_},
+\pat{\_\_slab\_}, \pat{slab\_}, \pat{mempool\_}, \pat{kmemdup} \\
+\hline
+
+\end{longtable}
+

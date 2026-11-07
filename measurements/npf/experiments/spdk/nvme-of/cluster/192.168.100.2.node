@@ -1,0 +1,12 @@
+0:pci=0000:03:00.0
+0:ifname=p0
+0:mac=08:c0:eb:d1:fb:2a
+0:ip=10.59.9.44
+1:pci=0000:03:00.1
+1:ifname=p1
+1:mac=08:c0:eb:d1:fb:2b
+1:ip=10.118.140.184
+2:pci=io@1
+2:ifname=tmfifo_net0
+2:mac=00:1a:ca:ff:ff:01
+2:ip=10.114.188.248

@@ -3,20 +3,68 @@ the main concepts and definitions used in the literature, then we will review th
 architectural challenges and solutions proposed by researchers. Finally, we will list some
 unresolved challenges that we aim to solve in this thesis.
 
+~\nt{What is a SmartNIC, how does it fit in a disagragated architecture?}
+
 \section{Overview of concepts and definitions}
 
-Hardware is evolving, notably through the transition from hard disk drives to \acrfull{ssd} devices and the decreasing cost of RAM.
-These trends have enabled researchers and companies to explore new approaches to \acrfull{hpc}. Modern \acrshort{ssd}s use the \acrfull{nvme} protocol, a low-latency, high-throughput interface designed for flash storage. \acrshort{nvme} devices can be accessed over the network using \acrfull{nvmeof}, which extends the \acrlong{nvme} command set to support network fabrics \nt{what is a smartNIC? :d} (smartNICs, \dots) \cite{noauthor_nvme_2021, noauthor_what_nodate, guz_nvme-over-fabrics_2017}. Such advancements made it possible to design new architecture designs, such as disaggregated datacenters.
+High-performance disaggregated storage rely on a tightly coupled pipeline bridging storage media, network interfaces and protocols, and specialized software stacks. To understand the challenges and solutions proposed in the literature, it is important to first define the main concepts layer by layer.
 
-This thesis uses \textit{disaggregation} to denote an architecture in which hardware resources such as compute, memory,
-accelerators, and storage are split into pools (or nodes) interconnected through a high-speed network. This design allows
-resources to be allocated on demand, improving utilization and availability. Two levels are commonly distinguished. \nt{Need more citations here}
-\textit{Partial disaggregation} separates storage from compute and memory, which remain integrated together; this level has
-already been widely implemented since the early 2020s. \textit{Full disaggregation} groups each resource type into dedicated
-clusters that communicate over the network. \cite{lin_disaggregated_2020}. Figures \ref{fig:partial-disaggregation} and \ref{fig:full-disaggregation} illustrate these two levels of disaggregation.
+% New kind of hardware components have emerged, \acrfull{ssd} are replacing traditional \acrfull{hdd}  
+% These trends have enabled researchers and companies to explore new approaches to \acrfull{hpc}. Modern \acrshort{ssd}s use the \acrfull{nvme} protocol, a low-latency, high-throughput interface designed for flash storage. \acrshort{nvme} devices can be accessed over the network using \acrfull{nvmeof}, which extends the \acrlong{nvme} command set to support network fabrics (smartNICs, \dots) \cite{noauthor_nvme_2021, noauthor_what_nodate, guz_nvme-over-fabrics_2017}. Such advancements made it possible to design new architecture designs, such as disaggregated datacenters. 
 
+% Writing efficient storage applications involves understanding the role of \acrfull{spdk}. \acrshort{spdk} is a set of tools and libraries for building high-performance storage applications, particularly those that interact with \acrshort{nvme} devices. It provides a user-space driver that bypasses the kernel, allowing for lower latency and higher throughput compared to traditional kernel-based drivers \cite{noauthor_storage_nodate}. This development kit will be used in this thesis to implement and evaluate our proposed solutions, as detailed in the next chapters.
+
+\subsection{Storage medium and interface}
+
+% A traditional \acrfull{hdd} is a mechanical device that stores data on spinning magnetic disks. Its performance is bounded by mechanical seek time and rotational latency, which limits its throughput and increases access time. In contrast, a \acrfull{ssd} is an electronic device that stores data on non-volatile flash memory. \cite{mecheloni_inside_2018}
+
+% \subsubsection{Peripheral Component Interconnect Express}
+
+% Pas oublier de faire le lien avec PCIe 5 / 6 pour en parler avec ZeroNIC.
+
+A traditional \acrfull{hdd} is a mechanical device that stores data on spinning magnetic disks. To read or write data, the drive must physically move a mechanical arm, the read/write head, to the correct track and wait for the disk to rotate to the correct position. These mechanical movements, called seek time and rotational latency take each a few milliseconds, which limits the throughput and increases access time. Typical throughput of a \acrshort{hdd} is around 100 MB/s and one hundred requests per second.  In contrast, a \acrfull{ssd} is a device that stores data on non-volatile flash memory and contains no moving parts : accessing data is a purely electronic operation that takes tens of microseconds. Modern \acrshort{ssd}s can achieve throughput of several GB/s and hundreds of thousands to millions of requests per second, depending on how those devices are connected to the system. \acrshort{ssd}s are therefore suitable for high-performance applications as they are a thousand to ten thousand times faster than \acrshort{hdd}s. \cite{mecheloni_inside_2018, haas_what_2023}
+
+This speedup has a consequence that motivates this thesis : the storage medium is no longer the bottleneck in the data path nor the slowest component in the system. With several millions of requests per second, the machine must process one request every few hundred nanoseconds, and the software layers such as system calls, the kernel block layer, interrupts, \dots become the new bottleneck. Understanding the storage medium and its interface is therefore crucial to design high-performance storage applications.
+
+\subsubsection{Flash memory behavior}
+
+Flash memory stores data in pages of a few kilobytes, which are grouped into blocks of a few megabytes. A page can be written only once before it must be erased, and an erase operation can only be performed on a whole block, so an \acrshort{ssd} cannot overwrite data in place. This behavior is called the \textit{erase-before-write}, and an internal controller is responsible to write data to a new page and erase old pages in the background. This behavior has direct consequences that reappear in chapter \ref{ch:evaluation} : write operations are slower and more complex than read operations, and continuous write throughput can drop if the \acrfull{slc} cache is exhausted. A \acrshort{slc} cache is a small portion of the \acrshort{ssd} that is used to store data in a single-level cell mode, which is faster than \acrshort{tlc} or \acrshort{qlc} used for the rest of the device. When the \acrshort{slc} cache is full, the \acrshort{ssd} must write data directly to the slower \acrshort{tlc}/\acrshort{qlc} area, which can cause a significant drop in write throughput.
+
+
+\subsubsection{PCI Express and NVMe}
+
+An \acrshort{ssd} can be connected to a computer through several interfaces, such as \acrshort{sata}, \acrshort{sas}, or \acrshort{pcie}. \acrshort{sata} and \acrshort{sas} are legacy interfaces that were designed for \acrshort{hdd}s, and are therefore limited in terms of throughput. Modern systems connect \acrshort{ssd}s to the processor over \acrfull{pcie}, a high-speed point-to-point interconnect that allows for low-latency, high-throughput communication between devices .\acrshort{pcie} has evovled into several generations, \acrshort{pcie} 3.0 transfers rougly 1 GB/s per lane, \acrshort{pcie} 4.0 about 2 GB/s per lane, \acrshort{pcie} 5.0 about 4 GB/s per lane, and \acrshort{pcie} 6.0 about 8 GB/s per lane \cite{pcie-1-5-bit-rates,pcie-6-specs}. A typical \acrshort{ssd} or \acrfull{nic} uses four lanes (x4) so \acrshort{pcie} 4.0 provides a total throughput of about 8 GB/s. The \acrshort{pcie} generation and lanes count thus determine the hard ceiling a storage device or network interface can achieve. \acrshort{pcie} also allows for \acrfull{dma} to and from devices, which allows for direct memory access without CPU involvement, further reducing latency and improving throughput.
 
 \begin{figure}[htbp]
+	\centering
+	\adjustbox{max width=0.85\columnwidth}
+	{\input{src/img/NVMe.tex}}
+	\caption{Illustration of the NVMe command submission and completion process. The host CPU enqueues commands in the \acrshort{sq}, notifies the controller via a doorbell register, and the controller fetches commands using \acrshort{dma}. Data is transferred between the host and controller using DMA, and upon completion, the controller writes a completion entry to the \acrshort{cq} and signals the host with an interrupt.}
+	\label{fig:NVMe-schema}
+\end{figure}
+
+
+
+\acrfull{nvme} is a protocol designed for high-speed communication with non-volatile storage devices, such as \acrshort{ssd}s. It provides a low-latency, high-throughput interface that allows multiple commands to be processed in parallel, making it well-suited for modern storage applications. \acrshort{nvme} uses queues to manage commands and completions. Commands are submitted to the \acrshort{ssd} through \acrfull{sq}s, the \acrshort{ssd} fetches the request from main memory using \acrshort{dma}, processes the request, and places the result in a \acrfull{cq}, ready to be picked up by the host. Many queues can exist in parallel, and each queue can hold multiple commands. This queuing model is what exposes the internal parallelism of the flash chips to the host. Since a single request takes tens of microseconds, reaching millions of requests per second requires keeping hundreds of requests in flight simultaneously. The number of outstanding requests is called the \acrshort{io} depth, and it is a key parameter of our evaluation methodology in chapter \ref{ch:evaluation}. Figure \ref{fig:NVMe-schema} illustrates the \acrshort{nvme} command process.
+
+Finally, \acrshort{nvme} was originally designed for locally attached devices over \acrshort{pcie}. The protocol has been extended to operate over \acrfull{nvmeof}, which we discuss in section \ref{sec:nvmeof}, as it is central to the SmartNIC architecture studied in this thesis.
+
+\subsection{Network} \label{sec:nvmeof}
+
+% High-speed network communication is a critical aspect of disaggregated architectures. \acrfull{rdma} \cite{rdma_rfc} \cite{rdma_consortium} is a protocol that allows one computer to access memory on another computer without CPU involvement, providing high throughput and low latency. \acrfull{roce} \cite{roce_nvidia_docs} is a variant of \acrshort{rdma} that operates over Ethernet networks, making it more widely compatible with existing infrastructure.
+
+
+\subsection{Disaggregation}
+
+% This thesis uses \textit{disaggregation} to denote an architecture in which hardware resources such as compute, memory,
+% accelerators, and storage are split into pools (or nodes) interconnected through a high-speed network. This design allows
+% resources to be allocated on demand, improving utilization and availability. Two levels are commonly distinguished.
+% \textit{Partial disaggregation} separates storage from compute and memory, which remain integrated together, this level has
+% already been widely implemented since the early 2020s. \textit{Full disaggregation} groups each resource type into dedicated
+% clusters that communicate over the network. \cite{lin_disaggregated_2020}. Figures \ref{fig:partial-disaggregation} and \ref{fig:full-disaggregation} illustrate these two levels of disaggregation.
+
+
+\begin{figure}[H]
 	\centering
 	\begin{minipage}{0.48\linewidth}
 		\centering
@@ -32,26 +80,12 @@ clusters that communicate over the network. \cite{lin_disaggregated_2020}. Figur
 	\end{minipage}
 \end{figure}
 
-\nt{Figures too small}
-
-High-speed network communication is a critical aspect of disaggregated architectures. \acrfull{rdma} \cite{rdma_rfc} \cite{rdma_consortium} is a protocol that allows one computer to access memory on another computer without CPU involvement, providing high throughput and low latency. \acrfull{roce} \cite{roce_nvidia_docs} is a variant of \acrshort{rdma} that operates over Ethernet networks, making it more widely compatible with existing infrastructure.
-~\nt{If we don't use it over Ethernet, what do we use it over then?}
-
-Writing efficient storage applications involves understanding the role of \acrfull{spdk}~\nt{is SPDK actually used in practice, need more citations here}. \acrshort{spdk} is a set of tools and libraries for building high-performance storage applications, particularly those that interact with \acrshort{nvme} devices. It provides a user-space driver that bypasses the kernel, allowing for lower latency and higher throughput compared to traditional kernel-based drivers \cite{noauthor_storage_nodate}. This development kit will be used in this thesis to implement and evaluate our proposed solutions, as detailed in the next chapters.
-~\nt{Need more details about how SPDK works and why is it better that the Kernel, in which case is it better}
-
-
-\begin{draftbox}
-	Sections below (until end of chapter) are draft notes and need to be rewritten and structured.
-	TODOs :
-	\begin{itemize}
-		\item Rewrite and structure improvements
-		\item Table of comparison of solutions
-	\end{itemize}
-\end{draftbox}
+\subsection{Software stack}
 
 
 \section{Architectural challenges}
+
+{\color{red} I did not modify this section, you can skip it, I plan to rewrite it later.}
 
 Architectural challenges can be grouped into two categories:
 
@@ -60,7 +94,7 @@ Architectural challenges can be grouped into two categories:
 	\item New challenges introduced by disaggregation, which break assumptions commonly made in earlier systems research and require new design approaches.
 \end{itemize}
 
-\nt{I would focus more on your topic and what you are trying to solve}
+\nt{This is too short and it lacks paper citations}
 
 \subsection{Monolithic challenges}
 
@@ -74,70 +108,93 @@ Finally, hardware replacement and upgrades in \acrfull{ma} often require costly 
 
 In disaggregated architecture (\acrfull{da}), the network becomes the central communication path between resource clusters. This creates strict latency and bandwidth requirements: \acrshort{cpu}-storage communication typically tolerates millisecond-scale delays, whereas \acrshort{cpu}-memory communication requires nanosecond-scale delays (around 100 ns) \cite{lin_disaggregated_2020}.
 
-Current network stacks also expose strong flexibility-performance trade-offs. \acrshort{rdma} and \acrfull{roce} offer high performance but limited flexibility due to hardware coupling. In addition, \acrshort{rdma} can suffer from head-of-line blocking, congestion, and vendor lock-in because its requirements are not always satisfied by commodity hardware. By contrast, Linux \acrshort{tcp} is more flexible but delivers lower performance and less efficient \acrshort{cpu} utilization \cite{skiadopoulos_high-throughput_2024}.
+Current network stacks also expose strong flexibility-performance trade-offs.~\nt{Explain a bit what is RDMA and what is RoCE} \acrshort{rdma} and \acrfull{roce} offer high performance but limited flexibility due to hardware coupling. In addition, \acrshort{rdma} can suffer from head-of-line blocking, congestion, and vendor lock-in because its requirements are not always satisfied by commodity hardware. By contrast, Linux \acrshort{tcp} is more flexible~\nt{This is too vague} but delivers lower performance and less efficient \acrshort{cpu} utilization \cite{skiadopoulos_high-throughput_2024}.
 
 
 \section{State-of-the-art designs and solutions} \label{sec:sota}
 
-\subsection{Zero-copy data path}
+\subsection{Control and data plane separation}
 
-The term \textit{zero-copy} refers to data transfer between devices without requiring data replication by the
-\acrshort{cpu}, thereby avoiding redundant copies and reducing \acrshort{cpu} usage. \authcite{skiadopoulos_high-throughput_2024} designed a new prototype called \textit{ZeroNIC} which can zero-copy data between NIC and accelerators. Its main advantage is that is it agnostic of the accelerator type and can run on \acrshort{cpu}, \acrshort{gpu}, \acrshort{fpga}, …
-NIC hardware split header and payload, transferring the latter directly to the receiver applications buffers without intermediates
-copies.
+% 1. Problem : monolithic TCP
+%.2. Mechanism : split stack
+% 3. Zero-copy data path
 
-Concerning \acrshort{nvme} storage, \authcite{sun_scalio_2025} focused on \acrshort{nvmeof} target offloading which extends zero-copy mechanism,
-transferring data to the \acrfull{dpu}'s \acrfull{hca} via peer-to-peer \acrfull{pci} communication (\acrfull{p2pdma}) and thus creating a new
-kind of zero-copy data path.
+~\nt{Discuss how decoupling the stack helps for scalability maybe? Need to fit better in the disagragation discussion}
+Standard network stacks like Linux \acrshort{tcp} force all operations to be executed on a single plane on the host \acrshort{cpu}, causing performance bottlenecks and resource contention.~\nt{sources? Claim should be backed up} To address this, researchers have proposed split stack architectures that separate control and data operations. This decoupling allows stateful control plane operations to be managed by the \acrshort{cpu}, while stateless data plane operations can be offloaded to hardware accelerators, enabling zero-copy mechanisms.~\nt{Aren't we mixing zero-copy and split stack here?} The term \textit{zero-copy} refers to data transfers between devices without requiring data replication by the CPU, thereby avoiding redundant copies and reducing CPU usage.
 
-\subsection{Batched write}
+Recent state-of-the-art research uses this design to solve encountered bottlenecks rather than offloading every operation. A common design is to separate control operations from data operations. This is the case for \textbf{IO-TCP} \cite{kim_rearchitecting_2023}, a \acrshort{http} / \acrshort{tls} web content delivery system which splits \textit{mTCP} \cite{jeong_mtcp_2014}, a userspace stack. The control plane is responsible for connection management, congestion control, and retransmission. It runs on the host \acrshort{cpu}, while the data plane is responsible for packet preparation and transfer, running on the smartNIC. This design prevents disk \acrshort{io} pollution in the \acrshort{cpu} cache and reduces contention, notably on the \acrfull{llc} miss rate which is improved by 27 \%. This allows a single core to saturate several \acrshort{nvme} disks at 77.4 Gbps, whereas Linux and Atlas \cite{marinos_diskcryptnet_2017} (a video streaming FreeBSD server) achieve roughly half that throughput even when using 10 cores. Network performance also benefits from reduced \acrshort{rtt} and improved throughput.
 
-Batched write mechanism retains write operations until an arbitrary threshold is achieved, then all these operations are run
-consecutively while a group commit ensures atomicity of operations. The goal is to improve throughput and reduce the accelerator
-\acrshort{cpu} load. While it is not technically a contribution brought by disaggregation, its evolution into such systems is still relevant
-to be mentioned.
+\nt{This could be more high-level, too many words/concepts are not explained}
 
-\subsection{Split stacks}
+While IO-TCP addresses host-centric bottlenecks with a specialized userspace implementation, \textbf{ZeroNIC} \cite{skiadopoulos_high-throughput_2024} focuses on flexibility and generality for host networking. Rather than modifying a specific stack, ZeroNIC physically separates the control and data planes to achieve end-to-end zero-copy, and can run on host userspace, kernel, or on an accelerator. Prior approaches required strict page alignment, page remapping, or custom \acrfull{api} to avoid data copies. ZeroNIC, on the other hand, achieves zero-copy without these constraints by delegating payload placement to the \acrshort{nic} hardware. Utilizing on-NIC data structures such as memory segments and flow tables, the hardware calculates memory offsets and \acrshort{dma}s payloads directly to applications (which can reside on \acrshort{cpu}, \acrshort{dpu}, or \acrshort{fpga}). The software control plane only processes splitted headers, maintaining reliable protocol semantics, without ever touching the payload. This approach allows a single core to saturate a 100 Gbps link with a single TCP flow, while using only 17\% of a single \acrshort{cpu}.
 
-\nt{Should be more high-level there, you need to explain the ideas}
-\nt{I would add a diagram here}
+\subsection{Hardware-offloaded storage}
 
-Split stacks are networking stacks divided in several planes, each one optimized for a specific task. IO-TCP from
-\authcite{kim_rearchitecting_2023} separate the traditional Linux \acrshort{tcp} stack into a stack running on the host \acrshort{cpu}, performing
-control operations, and thus called the control plane. Such operations are complex and benefits from features of the \acrfull{cisc} \acrshort{cpu}
-(for example branch prediction, vectorized instructions, …)~\nt{Pretty sure ARM also has those now :d}. The host stack extends the mTCP \cite{jeong_mtcp_2014} API with methods to offload
-file opening, writing, and closing, such that applications have the most minimal changes to do in order to run itself on IO-TCP.
+Beyond network stack offloading, zero-copy mechanisms can also be applied to storage operations. Concerning \acrshort{nvme} storage, \textbf{Scalio} \cite{sun_scalio_2025} focused on \acrshort{nvmeof} target offloading which extends the zero-copy mechanism, for storage applications. Scalio is a scalable disaggregated key-value store that transfers directly to the \acrfull{dpu}'s \acrfull{hca} via \acrshort{p2pdma}. This extends zero-copy to entirely bypass the \acrshort{dpu} cores for read operations, creating a new kind of zero-copy data path who drops \acrshort{cpu} usage to 0\% for these operations, and improves speedup over previous solutions like LEED\cite{guo_leed_2023} and Ditto\cite{shen_ditto_2023}. Scalio also implements batched write operations, which retain write operations until an arbitrary threshold is achieved. All these operations are then run consecutively while a group commit ensures atomicity of operations, improving throughput and reducing the accelerator \acrshort{cpu} load.
 
-The data plane handles all operations related to data packet preparation and transfer. These operations are simpler in comparison
-of the control plane and then fit better the \acrfull{arm} cores of the smartNIC. They also benefit from being stateless which suits the
-usage of the smartNIC. File and disk \acrfull{io} are offloaded to otherwise it would interfere with the control plane on host \acrshort{cpu}.
-Data plane operations are virtually performed and enable a mechanism of SEND / ECHO which translate in multiple \acrfull{mtu} packets
-transfer.
+\nt{Good}
 
-\nt{This is not detailed enough, either go deeper or remov this part}
-Many difficulties due to the split introduce themselves, like \acrfull{rtt} measurement, retransmission, and error handling, but are
-essentially resolved with the set of commands provided by the implementation.
+\subsection{Open challenges}
 
-\section{Unresolved challenges}
+While state-of-the-art solutions sucessfully mitigate host \acrshort{cpu} bottlenecks throught hardware offloading and split-stack architectures, they still face several limitations. These limitations include storage stack limitations, scalability and latency trade-offs.
 
-There are some challenges still left open upon reading papers in \textbf{section \ref{sec:sota}}. This section aims to
-list them, with the goal to define a clear approach for working on the master's thesis as well as a precise problem to solve.
+\subsubsection{Storage stack overheads}
 
-IO-TCP \cite{kim_rearchitecting_2023} lacks of dynamic synchronization. This because authors assumes that files don't change
-during the content delivery service. In their solution, both host and smartNIC share the same filesystem, but any change
-on the host-side \acrfull{fs} isn't propagated to the smartNIC stack.
-% -> Distributed FS ?
+Designs like IO-TCP decouple the network control and data planes, but still rely on traditional file systems like ext4 for storage operations. By relying on direct \acrshort{io} on ext4, the host is forced to maintain file system state. This design assume a static environment where files do not change during content delivery, which is not always the case in real-world scenarios. Any changes made to the file system on the host side are not propagated to the smartNIC stack, leading to potential inconsistencies and stale data being served. Furthermore, the overhead of maintaining this file system cause IO-TCP to underperform compared to Linux \acrshort{tcp} for a small number of connections (typically less than 4), where Linux achieves over 1.5 times the throughput of IO-TCP.
+Briding this gap by replacing kernel-based file systems with user-space storage stacks like \acrshort{spdk}~\nt{Are you sure that SPDK will necessarly help there? :d} is necessary to fully leverage the benefits of \acrshort{nvme} performance, but remains challenging due to the lack of mature file system support and abstractions in polled-mode user-space environments.
 
-Another problem is that file reading on \acrshort{nvme} disks is done with direct \acrshort{io} on a regular ext4 file system. \acrshort{spdk} reaches the best
-performance, but support for file system isn't very developed for now.~\nt{Citation here}
+\subsubsection{Hardware constraints in zero-copy}
 
-Next, with a smaller amount of connection (typically < 4), Linux \acrshort{tcp} stack outperforms IO-TCP by over 1.5 times.
+\nt{This is not clear, they do one queue per connection right? So this limits the number of concurent conncections}
 
-Batched writes used in Scalio \cite{sun_scalio_2025} to improve throughput of write operations come at the cost of latency
-increase. This can lead to non-negligible issues in environment where low latency is critical.
+General-purpose end-to-end zero-copy mechanisms, like those implemented in ZeroNIC, successfully bypass the host \acrshort{cpu} but are constrained by the hardware capabilities of the underlying network interface. The number of zero-copy flows that can be supported is strictly bound by the number of hardware queues available on the \acrshort{nic}, because payload placement is delegated to the hardware, thus requiring the flow tables and memory segments discussed earlier. Moreover, the prototype implementation of ZeroNIC frequently encountered \acrshort{pcie} bandwidth limitations when transferring data to \acrshort{gpu}, shifting the bottleneck from \acrshort{cpu}
+to the \acrshort{pcie} bus.
+
+
+\subsubsection{Latency trade-offs in storage offloading}
+
+Extending zero-copy mechanisms to storage target operations introduces severe latency penalties when attempting to scale throughput. Scalio demonstrates that \acrlong{p2pdma} between \acrshort{dpu} and \acrshort{nvme} can reduce \acrshort{cpu} usage to 0\% for read operations, however this is not applicable to write operations. To maintain throughput for write operations, Scalio system must uses batched writes, thus retaining write operations until a threshold is reached before committing them. While this group commit mechanism improves throughput, it also inflates latency. This trade-off between throughput and latency remains a significant challenge in disaggregated storage systems, particularly in environments where low-latency access is critical.
+
+\subsection{Work comparison}
+
+\begin{table}[H]
+\centering
+\caption{Comparison of state-of-the-art disaggregated and split-stack networking solutions \cite{kim_rearchitecting_2023, skiadopoulos_high-throughput_2024, sun_scalio_2025}.}
+\label{tab:sota_comparison}
+% \renewcommand{\arraystretch}{1.0}
+\begin{tabularx}{\columnwidth}{@{}p{2.5cm} X X X@{}}
+\toprule
+\textbf{Feature} & \textbf{IO-TCP} & \textbf{ZeroNIC} & \textbf{Scalio}  \\
+\midrule
+\midrule
+\textbf{System Category} & Split-stack TCP & Decoupled host network stack  & Hardware-offloaded key-value store  \\
+\textbf{Control Plane Location} & Host CPU (runs modified mTCP)  & Environment-agnostic (Host kernel, user space, or accelerator)  & Client nodes \& DPU cores \\
+\textbf{Data Plane Location} & SmartNIC (DPDK userspace)  & SmartNIC hardware logic  & DPU's HCA  \\
+\textbf{Data Path Mechanism} & Command packets, direct disk reads  & On-NIC Flow Tables \& Memory Segments  & \acrshort{p2pdma} direct to NVMe SSDs  \\
+\textbf{Zero-Copy Scope} & Host-side zero-copy (intermediate copy required in SmartNIC RAM)  & True end-to-end zero-copy (CPU, DPU, GPU, FPGA memory)  & True zero-copy for SSD reads (bypasses DPU CPU)  \\
+\textbf{Key Performance Metric} & 77.4 Gbps on 1 CPU core, 27\% LLC miss rate reduction  & 100 Gbps single-flow TCP at 17\% single core usage  & 0\% DPU CPU usage for reads , up to 3.3x speedup over LEED + Ditto  \\
+\textbf{Limitations / Lacks} & Relies on ext4 direct I/O rather than SPDK & Zero-copy flow capacity is strictly bound by the hardware's supported NIC queues, prototype faced PCIe bandwidth limits for GPU transfers & Throughput gains from batched writes incur a latency penalty, limiting use in strictly latency-critical environments \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{Objectives}
 
-This paper will focus on fully disaggregated datacenter, especially on interaction between \\acrshort{nvme} storage pools and smartNIC.
-One of our objectives is to allow SmartNICs to communicate directly with the storage without involving any compute pool.
-% TO-DO:  give a more precise definition
+\nt{Double check that the SPDK implementation is actually done, if not change the text below :d}
+
+This master's thesis focus on partial disaggregation. Our goal is to demonstrate that \acrshort{spdk} can both be used to maximize \acrshort{nvme} throughput capability, and serve as a building block for file systems operations in disaggregated storage solutions. To do so, we first evaluate the performance of \acrshort{spdk} in a disaggregated architecture, then we adapt the \textbf{IO-TCP solution} to use \acrshort{spdk}-based file systems operations instead of direct \acrshort{io} on a regular ext4 file system. Finally, we evaluate the performance of our solution in terms of throughput and latency, and compare it to existing solutions.
+
+The core contribution is to modify the \acrshort{nic} stack of IO-TCP to use \acrshort{spdk} \acrlong{bdev} and blobstore layers to build more optimized file system operations. This allow us to fully exploit \acrshort{pcie} \acrshort{nvme} by bypassing the kernel block layer, with better efficiency in terms of \acrshort{cpu} usage and throughput, while maintaining the benefits of a split-stack architecture.
+
+Choosing IO-TCP as a base for our work is motivated by several factors. First, IO-TCP and \acrshort{spdk} operates in userspace, allowing to share memory domains (specifically \acrshort{dpdk} hugepages) and avoid kernel context switches. Second, as noted in IO-TCP paper, ext4 is suboptimal for their use case, and that \acrshort{spdk} would be a better alternative. Third, IO-TCP's purpose is disk-bound web content delivery, whereas other solutions like ZeroNIC are general-purpose networking solutions. Finally, \acrshort{spdk} userspace polling mode integrate well with IO-TCP's userspace stack (mTCP), allowing for an unified kernel-bypass architecture. 
+
+
+\nt{Should be it's own section, not 2.5}
+
+\section{IO-TCP implementation analysis}
+
+\subsection{Deprecated parts}
+
+\subsection{Host stack}
+
+\subsection{NIC stack}

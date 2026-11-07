@@ -22,14 +22,18 @@
 \usepackage[inkscapeformat=pdf]{svg}
 \usepackage[backend=bibtex, style=ieee]{biblatex}
 \usepackage{csquotes}
-\usepackage[hidelinks]{hyperref}
+\usepackage{hyperref}
 \usepackage[acronym]{glossaries}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usepackage{tikz}
+\usetikzlibrary{positioning,fit,calc,arrows.meta,backgrounds}
 \usepackage[most]{tcolorbox}
 \usepackage[newfloat]{minted}
 \usepackage[svgnames]{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{adjustbox}
 
 % Please fill in the following boxes
 % Title of the thesis
@@ -68,9 +72,9 @@
 %\thirdsupervisor{Firstname \textsc{Lastname}}		% remove if not applicable
 
 % Name of the reader(s)
-\readerone{Firstname \textsc{Lastname}}
-\readertwo{Firstname \textsc{Lastname}}			% remove if not applicable
-\readerthree{Firstname \textsc{Lastname}}			% remove if not applicable
+\readerone{Nikita \textsc{Tyunyayev}}
+\readertwo{Vany \textsc{Ingezi}}			% remove if not applicable
+% \readerthree{Firstname \textsc{Lastname}}			% remove if not applicable
 %\readerfour{Firstname \textsc{Lastname}}			% remove if not applicable
 %\readerfive{Firstname \textsc{Lastname}}			% remove if not applicable
 
@@ -126,9 +130,28 @@
     pdfproducer={pdflatex},
 }
 
+\tikzset{
+  panel/.style={draw=black!75,line width=.8pt,rounded corners=3pt,fill=gray!5,inner sep=8pt},
+  mem/.style={draw=black!75,line width=.7pt,rounded corners=2pt,fill=white},
+  cell/.style={draw=black!65,line width=.55pt,fill=white,minimum width=1.05cm,
+               minimum height=.48cm,font=\scriptsize,inner sep=1pt},
+  cqe/.style={cell,minimum width=1.15cm},
+  boxtitle/.style={font=\small\bfseries},
+  cpubox/.style={mem,minimum width=1.5cm,minimum height=.65cm,font=\small\bfseries},
+  dbbox/.style={mem,minimum width=1.8cm,minimum height=.50cm,font=\scriptsize\bfseries},
+  engbox/.style={mem,minimum width=2.8cm,minimum height=1.0cm,align=center,font=\small\bfseries},
+  flashbox/.style={mem,minimum width=2.5cm,minimum height=.75cm,font=\small\bfseries},
+  bufbox/.style={mem,minimum width=4.0cm,minimum height=.9cm,align=center,font=\small\bfseries},
+  arr/.style={-{Stealth[length=2.4mm,width=1.7mm]},line width=.9pt,draw=black!85},
+  bi/.style={{Stealth[length=2.4mm,width=1.7mm]}-{Stealth[length=2.4mm,width=1.7mm]},line width=.9pt,draw=black!85},
+  dasharr/.style={-{Stealth[length=2.4mm,width=1.7mm]},line width=.85pt,dashed,draw=black!70},
+  lab/.style={inner sep=2pt,font=\scriptsize,align=center},
+}
+
 % Document
 \begin{document}
 % Front cover page
+\thispagestyle{empty}
 \maketitle
 
 \pagestyle{empty}
@@ -138,18 +161,13 @@
 
     \input{src/abstract.tex}
 
-\pagestyle{empty}
-
 \setcounter{tocdepth}{4}
 \tableofcontents
-\thispagestyle{empty}
 \newpage
 
 \printglossary[title= List of acronyms, type=\acronymtype]
-\thispagestyle{empty}
 \newpage
 \listoflistings
-\thispagestyle{empty}
 \newpage
 
 \chapter{Introduction}
@@ -164,17 +182,24 @@
 
     \input{src/background}
 
+\chapter{Implementation} \label{ch:implementation}
 
-\chapter{Measurements} \label{ch:measurements}
+    \input{src/implementation.tex} 
 
-    \input{src/measurements}
+\chapter{Evaluation} \label{ch:evaluation}
 
-\chapter{Appendix : performances script} \label{ch:perfs-scripts}
+    \input{src/evaluation.tex} 
+
+
+\chapter{Conclusion and future work} \label{ch:conclusion}
+
+    \input{src/conclusion.tex}
+
+\chapter*{Appendix : additional plots data} \label{ch:appendix-plots-data}
 \pagenumbering{roman}
 \setcounter{page}{1}
 
-    \input{src/appendix-perf.tex}
-
+    \input{src/appendix-plots-data.tex} 
 
 \printbibliography[heading=bibintoc]
 

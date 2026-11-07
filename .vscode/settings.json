@@ -1,5 +1,13 @@
 {
   "[latex]": {
     "editor.wordWrap": "on"
-  }
+  },
+  "latex-workshop.latex.external.build.command": "make",
+  "latex-workshop.latex.external.build.args": [
+    "-C",
+    "/home/nicolas/UCL/Master/master-thesis/writing"
+  ],
+  "latex-workshop.latex.outDir": "%DIR%",
+  "latex-workshop.intellisense.biblatexJSON.replace": {},
+  "latex-workshop.latex.autoBuild.run": "onFileChange"
 }

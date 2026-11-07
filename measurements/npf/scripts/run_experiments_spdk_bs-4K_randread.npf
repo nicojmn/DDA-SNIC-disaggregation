@@ -1,0 +1,165 @@
+%info
+// mode will be set up automically by fish script
+// Alternatively, you can manually run npf and set up a mode
+spdk_bdev fio [randread] benchmark
+
+%config
+
+n_runs=5
+var_names={BANDWIDTH:Throughput,ENGINE:I/O engine,SIZE:File size (MB),IO_BYTES:Bytes read/written,IOPS:IOPS,LAT_MEAN_NS:Mean latency,LAT_P99_NS:p99 latency,LAT_P999_NS:p99.9 latency,LAT_P9999_NS:p99.99 latency,LAT_STDDEV_NS:Latency stddev,SLAT_MEAN_NS:Mean submission latency,USR_CPU:User CPU,SYS_CPU:System CPU}
+var_unit={BANDWIDTH:B/s,SIZE:B,IO_BYTES:B,IOPS:ops,LAT_MEAN_NS:ns,LAT_P99_NS:ns,LAT_P999_NS:ns,LAT_P9999_NS:ns,LAT_STDDEV_NS:ns,SLAT_MEAN_NS:ns,USR_CPU:%,SYS_CPU:%}
+var_divider={BANDWIDTH:1,SIZE:0.000001,IO_BYTES:1,IOPS:1,LAT_MEAN_NS:1000,LAT_P99_NS:1000,LAT_P999_NS:1000,LAT_P9999_NS:1000,LAT_STDDEV_NS:1000,SLAT_MEAN_NS:1000}
+var_format={BANDWIDTH:eng.2.B/s,SIZE:eng.0.B,IO_BYTES:eng.2.B,IOPS:eng.2,LAT_MEAN_NS:eng.2.µs,LAT_P99_NS:eng.2.µs,LAT_P999_NS:eng.2.µs,LAT_P9999_NS:eng.2.µs,LAT_STDDEV_NS:eng.2.µs,SLAT_MEAN_NS:eng.2.µs,USR_CPU:%.1f,SYS_CPU:%.1f}
+graph_serie=ENGINE
+graph_type=barplot
+%variables
+SIZE={4,10,100,1024}
+ENGINE={spdk_bdev,libaio,io_uring}
+
+%late_variables
+RW={randread}
+PCI_ADDRESS={0000:02:00.0}
+NVME={nvme0n2}
+
+%script@server sudo=true timeout=600
+
+if [[ "${RW}" == *"rw" ]];
+then
+    MIXED_PARAMS="--rwmixread=50 --norandommap=1"
+else
+    MIXED_PARAMS=""
+fi
+
+if [[ "${ENGINE}" == "spdk_bdev" ]];
+then
+    if [ -b "/dev/${NVME}" ]; then
+        NVME=""
+        for dev in /dev/nvme0n*; do
+            [ -b "$dev" ] || continue
+            SYSFS_LINK=$(readlink -f /sys/class/block/$(basename "$dev") 2>/dev/null)
+            if echo "$SYSFS_LINK" | grep -q "${PCI_ADDRESS}"; then
+                NVME=$(basename "$dev")
+                echo "Found NVMe device: ${NVME} at PCI ${PCI_ADDRESS}"
+                break
+            fi
+        done
+    
+        if [ -z "$NVME" ]; then
+            echo "ERROR: Could not find NVMe device at PCI ${PCI_ADDRESS}"
+        fi
+        
+        PCI_ALLOWED=${PCI_ADDRESS} /etinfo/users/2021/njeanmenne/spdk/scripts/setup.sh
+        while [ -b "/dev/${NVME}" ]; do
+            echo "Waiting to bind SPDK (${NVME})..."
+            sleep 1
+        done
+    fi
+    cat > "/tmp/benchmark-conf.json" << JSON
+{
+  "subsystems": [
+    {
+      "subsystem": "bdev",
+      "config": [
+        {
+          "method": "bdev_nvme_attach_controller",
+          "params": {
+            "name": "Nvme0",
+            "trtype": "PCIe",
+            "traddr": "${PCI_ADDRESS}"
+          }
+        }
+      ]
+    }
+  ]
+}
+JSON
+
+    LD_PRELOAD=/etinfo/users/2021/njeanmenne/spdk/build/fio/spdk_bdev fio --name=npf_spdk-fio_read \
+            --ioengine=${ENGINE} \
+            --spdk_json_conf=/tmp/benchmark-conf.json \
+            --filename=Nvme0n1 \
+            --direct=1 \
+            --thread=1 \
+            --overwrite=1 \
+            --time_based=1 \
+            --runtime=300 \
+            --ramp_time=30 \
+            --percentile_list=99:99.9:99.99 \
+            --rw=${RW} \
+            --bs=4K \
+            --iodepth=64 \
+            --size=${SIZE}M \
+            ${MIXED_PARAMS} \
+            --output-format=json > fio.json
+else
+
+    if [ ! -b "/dev/${NVME}" ]; then
+        NVME=""
+        for dev in /dev/nvme0n*; do
+            [ -b "$dev" ] || continue
+            SYSFS_LINK=$(readlink -f /sys/class/block/$(basename "$dev") 2>/dev/null)
+            if echo "$SYSFS_LINK" | grep -q "${PCI_ADDRESS}"; then
+                NVME=$(basename "$dev")
+                echo "Found NVMe device: ${NVME} at PCI ${PCI_ADDRESS}"
+                break
+            fi
+        done
+    
+        if [ -z "$NVME" ]; then
+            echo "ERROR: Could not find NVMe device at PCI ${PCI_ADDRESS}"
+        fi
+        
+        /etinfo/users/2021/njeanmenne/spdk/scripts/setup.sh reset
+        while [ ! -b "/dev/${NVME}" ]; do
+            echo "Waiting to bind nvme driver (${NVME})..."
+            sleep 1
+        done
+    fi
+      
+    fio --name=npf_spdk-fio_read \
+            --ioengine=${ENGINE} \
+            --filename=/dev/${NVME} \
+            --direct=1 \
+            --thread=1 \
+            --overwrite=1 \
+            --time_based=1 \
+            --runtime=300 \
+            --ramp_time=30 \
+            --percentile_list=99:99.9:99.99 \
+            --rw=${RW} \
+            --bs=4K \
+            --iodepth=64 \
+            --size=${SIZE}M \
+            ${MIXED_PARAMS} \
+            --output-format=json > fio.json
+fi
+
+if [[ "${RW}" == *"read"* ]]; then
+    MODE="read"
+else
+    MODE="write"
+fi
+
+bw_bps=$(jq ".jobs[0].${MODE}.bw_bytes" fio.json)
+io_bytes=$(jq ".jobs[0].${MODE}.io_bytes" fio.json)
+iops=$(jq ".jobs[0].${MODE}.iops" fio.json)
+lat_mean=$(jq ".jobs[0].${MODE}.clat_ns.mean" fio.json)
+lat_stddev=$(jq ".jobs[0].${MODE}.clat_ns.stddev" fio.json)
+lat_p99=$(jq ".jobs[0].${MODE}.clat_ns.percentile[\"99.000000\"]" fio.json)
+lat_p999=$(jq ".jobs[0].${MODE}.clat_ns.percentile[\"99.900000\"]" fio.json)
+lat_p9999=$(jq ".jobs[0].${MODE}.clat_ns.percentile[\"99.990000\"]" fio.json)
+slat_mean=$(jq ".jobs[0].${MODE}.slat_ns.mean" fio.json)
+usr_cpu=$(jq ".jobs[0].usr_cpu" fio.json)
+sys_cpu=$(jq ".jobs[0].sys_cpu" fio.json)
+
+echo "RESULT-BANDWIDTH $bw_bps"
+echo "RESULT-IO_BYTES $io_bytes"
+echo "RESULT-IOPS $iops"
+echo "RESULT-LAT_MEAN_NS $lat_mean"
+echo "RESULT-LAT_STDDEV_NS $lat_stddev"
+echo "RESULT-LAT_P99_NS $lat_p99"
+echo "RESULT-LAT_P999_NS $lat_p999"
+echo "RESULT-LAT_P9999_NS $lat_p9999"
+echo "RESULT-SLAT_MEAN_NS $slat_mean"
+echo "RESULT-USR_CPU $usr_cpu"
+echo "RESULT-SYS_CPU $sys_cpu"

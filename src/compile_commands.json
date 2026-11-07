@@ -4,18 +4,87 @@
       "/usr/bin/gcc",
       "-c",
       "-I/etinfo/users/2021/njeanmenne/spdk/build/include",
+      "-g",
       "-pthread",
       "-Wl,--whole-archive",
       "-Wl,-Bstatic",
       "-Wl,-Bdynamic",
       "-Wl,--no-whole-archive",
+      "/etinfo/users/2021/njeanmenne/spdk/isa-l/.libs/libisal.a",
+      "/etinfo/users/2021/njeanmenne/spdk/isa-l-crypto/.libs/libisal_crypto.a",
       "-pthread",
       "-o",
-      "test-name",
-      "./get_bdev_name.c"
+      "./out/test-info",
+      "./get_info.c"
     ],
-    "directory": "/etinfo/users/2021/njeanmenne/src",
-    "file": "/etinfo/users/2021/njeanmenne/src/get_bdev_name.c",
-    "output": "/etinfo/users/2021/njeanmenne/src/test-name"
+    "directory": "/etinfo/users/2021/njeanmenne/master-thesis/src",
+    "file": "/etinfo/users/2021/njeanmenne/master-thesis/src/get_info.c",
+    "output": "/etinfo/users/2021/njeanmenne/master-thesis/src/out/test-info"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I/etinfo/users/2021/njeanmenne/spdk/build/include",
+      "-g",
+      "-pthread",
+      "-Wl,--whole-archive",
+      "-Wl,-Bstatic",
+      "-Wl,-Bdynamic",
+      "-Wl,--no-whole-archive",
+      "/etinfo/users/2021/njeanmenne/spdk/isa-l/.libs/libisal.a",
+      "/etinfo/users/2021/njeanmenne/spdk/isa-l-crypto/.libs/libisal_crypto.a",
+      "-pthread",
+      "-o",
+      "./out/rwstring",
+      "./rwstring.c"
+    ],
+    "directory": "/etinfo/users/2021/njeanmenne/master-thesis/src",
+    "file": "/etinfo/users/2021/njeanmenne/master-thesis/src/rwstring.c",
+    "output": "/etinfo/users/2021/njeanmenne/master-thesis/src/out/rwstring"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I/etinfo/users/2021/njeanmenne/spdk/build/include",
+      "-g",
+      "-pthread",
+      "-Wl,--whole-archive",
+      "-Wl,-Bstatic",
+      "-Wl,-Bdynamic",
+      "-Wl,--no-whole-archive",
+      "/etinfo/users/2021/njeanmenne/spdk/isa-l/.libs/libisal.a",
+      "/etinfo/users/2021/njeanmenne/spdk/isa-l-crypto/.libs/libisal_crypto.a",
+      "-pthread",
+      "-o",
+      "./out/basic-cp",
+      "./basic-cp.c"
+    ],
+    "directory": "/etinfo/users/2021/njeanmenne/master-thesis/src",
+    "file": "/etinfo/users/2021/njeanmenne/master-thesis/src/basic-cp.c",
+    "output": "/etinfo/users/2021/njeanmenne/master-thesis/src/out/basic-cp"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I/etinfo/users/2021/njeanmenne/spdk/build/include",
+      "-g",
+      "-pthread",
+      "-Wl,--whole-archive",
+      "-Wl,-Bstatic",
+      "-Wl,-Bdynamic",
+      "-Wl,--no-whole-archive",
+      "/etinfo/users/2021/njeanmenne/spdk/isa-l/.libs/libisal.a",
+      "/etinfo/users/2021/njeanmenne/spdk/isa-l-crypto/.libs/libisal_crypto.a",
+      "-pthread",
+      "-o",
+      "./out/queue-cp",
+      "./queue-cp.c"
+    ],
+    "directory": "/etinfo/users/2021/njeanmenne/master-thesis/src",
+    "file": "/etinfo/users/2021/njeanmenne/master-thesis/src/queue-cp.c",
+    "output": "/etinfo/users/2021/njeanmenne/master-thesis/src/out/queue-cp"
   }
 ]
