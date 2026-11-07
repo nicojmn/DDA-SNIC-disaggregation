@@ -1,0 +1,60 @@
+\begin{tikzpicture}
+  \def\cellsep{1pt}
+
+  \node[cpubox] (cpu) at (0.7,6.6) {CPU};
+
+  \node[cell] (cmd0) at (3.0,5.6) {CMD 0};
+  \node[cell,right=\cellsep of cmd0] (cmd1) {CMD 1};
+  \node[cell,right=\cellsep of cmd1] (cmd2) {CMD 2};
+  \node[boxtitle,above=2pt of cmd1] (sqtitle) {Submission Queue (SQ)};
+
+
+  \node[fit=(cpu)(sqtitle)(cmd0)(cmd2),inner sep=0pt] (hostTopRef) {};
+
+  \node[bufbox,below=12mm of hostTopRef] (buffer) {Data buffer \\host memory};
+
+  \node[cqe,below=12mm of buffer] (cqe1) {CQE 1};
+  \node[cqe,left=\cellsep of cqe1] (cqe0) {CQE 0};
+  \node[cqe,right=\cellsep of cqe1] (cqe2) {CQE 2};
+  \node[boxtitle,above=2pt of cqe1] (cqtitle) {Completion Queue (CQ)};
+
+  \node[dbbox] (sqdb) at (9.0,6.6) {SQ Tail DB};
+  \node[dbbox,right=3mm of sqdb] (cqdb) {CQ Head DB};
+  \node[engbox] (eng) at (10.2,4.3) {Controller command /\\DMA engine};
+  \node[flashbox] (flash) at (10.2,2.1) {Flash media};
+
+
+  \begin{pgfonlayer}{background}
+    \node[panel,inner ysep=11pt,fit=(cpu)(sqtitle)(cmd0)(cmd2)(buffer)(cqtitle)(cqe0)(cqe2)] (host) {};
+    \node[mem,inner sep=2pt,fit=(sqtitle)(cmd0)(cmd2)] (sq) {};
+    \node[mem,fit=(cqtitle)(cqe0)(cqe2)] (cq) {};
+    \node[panel,fit=(sqdb)(cqdb)(eng)(flash)] (ctl) {};
+  \end{pgfonlayer}
+
+  \node[font=\bfseries\large,above=2pt of host] {Host (CPU + DRAM)};
+  \node[font=\bfseries\large,above=2pt of ctl] {NVMe Controller (SSD)};
+
+
+  \draw[arr]
+    (cpu.south) |- node[pos=0.5,lab,below=4pt, fill=white] {\textbf{1.} enqueue} (cmd0.west);
+
+  \draw[arr]
+    (cmd2.east) -- (cmd2.east -| sqdb.south) |- node[pos=0.85,xshift=45pt,lab,below=5pt, fill=white] {\textbf{2.} Host rings SQ tail \\ doorbell} (sqdb.south);
+
+  \draw[arr]
+    (sq.south) |- node[pos=0.75,lab,above,fill=white] {\textbf{3.} DMA read: fetch command} (eng.north west);
+
+  \draw[bi]
+    (buffer.east) -| ([xshift=-20pt]eng.west) node[near start,lab,below=2pt,xshift=8pt,fill=white] {\textbf{4.} DMA read/write data} |- (eng.west);
+
+  \draw[arr]
+    (eng.south west) |- node[midway,lab,below,fill=white,xshift=60pt, yshift=15pt] {\textbf{5.} DMA write: completion entry} (cq.north east);
+
+  \draw[dasharr]
+    (ctl.west |- flash.west) -- node[midway,lab,above,yshift=2pt] {\textbf{6.} interrupt} (host.east |- flash.west);
+
+  \draw[arr,rounded corners=5pt]
+    (cq.south) |- (12.9,0.6)
+    node[very near end,lab,above] {\textbf{7.} Host rings CQ head doorbell}
+    -- (12.9,6.6) -- (cqdb.east);
+\end{tikzpicture}

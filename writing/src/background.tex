@@ -16,19 +16,40 @@ High-performance disaggregated storage rely on a tightly coupled pipeline bridgi
 
 \subsection{Storage medium and interface}
 
-A traditional \acrfull{hdd} is a mechanical device that stores data on spinning magnetic disks. Its performance is bounded by mechanical seek time and rotational latency, which limits its throughput and increases access time. In contrast, a \acrfull{ssd} is an electronic device that stores data on non-volatile flash memory. \cite{mecheloni_inside_2018}
+% A traditional \acrfull{hdd} is a mechanical device that stores data on spinning magnetic disks. Its performance is bounded by mechanical seek time and rotational latency, which limits its throughput and increases access time. In contrast, a \acrfull{ssd} is an electronic device that stores data on non-volatile flash memory. \cite{mecheloni_inside_2018}
 
-\subsubsection{Peripheral Component Interconnect Express}
+% \subsubsection{Peripheral Component Interconnect Express}
 
-Pas oublier de faire le lien avec PCIe 5 / 6 pour en parler avec ZeroNIC.
+% Pas oublier de faire le lien avec PCIe 5 / 6 pour en parler avec ZeroNIC.
 
-\subsubsection{Non-volatile memory express}
+A traditional \acrfull{hdd} is a mechanical device that stores data on spinning magnetic disks. To read or write data, the drive must physically move a mechanical arm, the read/write head, to the correct track and wait for the disk to rotate to the correct position. These mechanical movements, called seek time and rotational latency take each a few milliseconds, which limits the throughput and increases access time. Typical throughput of a \acrshort{hdd} is around 100 MB/s and one hundred requests per second.  In contrast, a \acrfull{ssd} is a device that stores data on non-volatile flash memory and contains no moving parts : accessing data is a purely electronic operation that takes tens of microseconds. Modern \acrshort{ssd}s can achieve throughput of several GB/s and hundreds of thousands to millions of requests per second, depending on how those devices are connected to the system. \acrshort{ssd}s are therefore suitable for high-performance applications as they are a thousand to ten thousand times faster than \acrshort{hdd}s. \cite{mecheloni_inside_2018, haas_what_2023}
 
-\subsubsection{SLC, MLC, TLC, QLC, and pSLC}
+This speedup has a consequence that motivates this thesis : the storage medium is no longer the bottleneck in the data path nor the slowest component in the system. With several millions of requests per second, the machine must process one request every few hundred nanoseconds, and the software layers such as system calls, the kernel block layer, interrupts, \dots become the new bottleneck. Understanding the storage medium and its interface is therefore crucial to design high-performance storage applications.
+
+\subsubsection{Flash memory behavior}
+
+Flash memory stores data in pages of a few kilobytes, which are grouped into blocks of a few megabytes. A page can be written only once before it must be erased, and an erase operation can only be performed on a whole block, so an \acrshort{ssd} cannot overwrite data in place. This behavior is called the \textit{erase-before-write}, and an internal controller is responsible to write data to a new page and erase old pages in the background. This behavior has direct consequences that reappear in chapter \ref{ch:evaluation} : write operations are slower and more complex than read operations, and continuous write throughput can drop if the \acrfull{slc} cache is exhausted. A \acrshort{slc} cache is a small portion of the \acrshort{ssd} that is used to store data in a single-level cell mode, which is faster than \acrshort{tlc} or \acrshort{qlc} used for the rest of the device. When the \acrshort{slc} cache is full, the \acrshort{ssd} must write data directly to the slower \acrshort{tlc}/\acrshort{qlc} area, which can cause a significant drop in write throughput.
+
+
+\subsubsection{PCI Express and NVMe}
+
+An \acrshort{ssd} can be connected to a computer through several interfaces, such as \acrshort{sata}, \acrshort{sas}, or \acrshort{pcie}. \acrshort{sata} and \acrshort{sas} are legacy interfaces that were designed for \acrshort{hdd}s, and are therefore limited in terms of throughput. Modern systems connect \acrshort{ssd}s to the processor over \acrfull{pcie}, a high-speed point-to-point interconnect that allows for low-latency, high-throughput communication between devices .\acrshort{pcie} has evovled into several generations, \acrshort{pcie} 3.0 transfers rougly 1 GB/s per lane, \acrshort{pcie} 4.0 about 2 GB/s per lane, \acrshort{pcie} 5.0 about 4 GB/s per lane, and \acrshort{pcie} 6.0 about 8 GB/s per lane \cite{pcie-1-5-bit-rates,pcie-6-specs}. A typical \acrshort{ssd} or \acrfull{nic} uses four lanes (x4) so \acrshort{pcie} 4.0 provides a total throughput of about 8 GB/s. The \acrshort{pcie} generation and lanes count thus determine the hard ceiling a storage device or network interface can achieve. \acrshort{pcie} also allows for \acrfull{dma} to and from devices, which allows for direct memory access without CPU involvement, further reducing latency and improving throughput.
+
+\begin{figure}[htbp]
+	\centering
+	\adjustbox{max width=0.85\columnwidth}
+	{\input{src/img/NVMe.tex}}
+	\caption{Illustration of the NVMe command submission and completion process. The host CPU enqueues commands in the \acrshort{sq}, notifies the controller via a doorbell register, and the controller fetches commands using \acrshort{dma}. Data is transferred between the host and controller using DMA, and upon completion, the controller writes a completion entry to the \acrshort{cq} and signals the host with an interrupt.}
+	\label{fig:NVMe-schema}
+\end{figure}
 
 
 
-\subsection{Network}
+\acrfull{nvme} is a protocol designed for high-speed communication with non-volatile storage devices, such as \acrshort{ssd}s. It provides a low-latency, high-throughput interface that allows multiple commands to be processed in parallel, making it well-suited for modern storage applications. \acrshort{nvme} uses queues to manage commands and completions. Commands are submitted to the \acrshort{ssd} through \acrfull{sq}s, the \acrshort{ssd} fetches the request from main memory using \acrshort{dma}, processes the request, and places the result in a \acrfull{cq}, ready to be picked up by the host. Many queues can exist in parallel, and each queue can hold multiple commands. This queuing model is what exposes the internal parallelism of the flash chips to the host. Since a single request takes tens of microseconds, reaching millions of requests per second requires keeping hundreds of requests in flight simultaneously. The number of outstanding requests is called the \acrshort{io} depth, and it is a key parameter of our evaluation methodology in chapter \ref{ch:evaluation}. Figure \ref{fig:NVMe-schema} illustrates the \acrshort{nvme} command process.
+
+Finally, \acrshort{nvme} was originally designed for locally attached devices over \acrshort{pcie}. The protocol has been extended to operate over \acrfull{nvmeof}, which we discuss in section \ref{sec:nvmeof}, as it is central to the SmartNIC architecture studied in this thesis.
+
+\subsection{Network} \label{sec:nvmeof}
 
 % High-speed network communication is a critical aspect of disaggregated architectures. \acrfull{rdma} \cite{rdma_rfc} \cite{rdma_consortium} is a protocol that allows one computer to access memory on another computer without CPU involvement, providing high throughput and low latency. \acrfull{roce} \cite{roce_nvidia_docs} is a variant of \acrshort{rdma} that operates over Ethernet networks, making it more widely compatible with existing infrastructure.
 

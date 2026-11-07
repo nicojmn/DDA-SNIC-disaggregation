@@ -27,11 +27,13 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usepackage{tikz}
+\usetikzlibrary{positioning,fit,calc,arrows.meta,backgrounds}
 \usepackage[most]{tcolorbox}
 \usepackage[newfloat]{minted}
 \usepackage[svgnames]{xcolor}
 \usepackage{booktabs}
 \usepackage{tabularx}
+\usepackage{adjustbox}
 
 % Please fill in the following boxes
 % Title of the thesis
@@ -126,6 +128,24 @@
     pdfsubject={Master thesis: Direct device access and datacenter disaggregation},
     pdfkeywords={smartNIC, datacenter, disaggregation, direct memory access, DMA, RDMA, NVMe},
     pdfproducer={pdflatex},
+}
+
+\tikzset{
+  panel/.style={draw=black!75,line width=.8pt,rounded corners=3pt,fill=gray!5,inner sep=8pt},
+  mem/.style={draw=black!75,line width=.7pt,rounded corners=2pt,fill=white},
+  cell/.style={draw=black!65,line width=.55pt,fill=white,minimum width=1.05cm,
+               minimum height=.48cm,font=\scriptsize,inner sep=1pt},
+  cqe/.style={cell,minimum width=1.15cm},
+  boxtitle/.style={font=\small\bfseries},
+  cpubox/.style={mem,minimum width=1.5cm,minimum height=.65cm,font=\small\bfseries},
+  dbbox/.style={mem,minimum width=1.8cm,minimum height=.50cm,font=\scriptsize\bfseries},
+  engbox/.style={mem,minimum width=2.8cm,minimum height=1.0cm,align=center,font=\small\bfseries},
+  flashbox/.style={mem,minimum width=2.5cm,minimum height=.75cm,font=\small\bfseries},
+  bufbox/.style={mem,minimum width=4.0cm,minimum height=.9cm,align=center,font=\small\bfseries},
+  arr/.style={-{Stealth[length=2.4mm,width=1.7mm]},line width=.9pt,draw=black!85},
+  bi/.style={{Stealth[length=2.4mm,width=1.7mm]}-{Stealth[length=2.4mm,width=1.7mm]},line width=.9pt,draw=black!85},
+  dasharr/.style={-{Stealth[length=2.4mm,width=1.7mm]},line width=.85pt,dashed,draw=black!70},
+  lab/.style={inner sep=2pt,font=\scriptsize,align=center},
 }
 
 % Document
