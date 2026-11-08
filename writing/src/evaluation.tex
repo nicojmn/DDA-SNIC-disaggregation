@@ -1,5 +1,7 @@
 This chapter will cover evaluation steps-to-step from the baseline to the implemented solution. Information about
-server specifications (called Frodo) are provided in Table \ref{table:frodo-specs}, and information about the SmartNIC specifications are provided in Table \ref{table:smartnic-specs}. The performances evaluation focus mainly on two metrics : throughput and latency. Experiments could be make thanks to \acrfull{npf} \cite{barbette_tbarbettenpf_2026}.
+server specifications (called Frodo) are provided in Table \ref{table:frodo-specs}, and information about the SmartNIC specifications are provided in Table \ref{table:smartnic-specs}. Experiments could be make thanks to \acrfull{npf} \cite{barbette_tbarbettenpf_2026}.
+
+\section{Expiremental methodology}
 
 \begin{table}[htpb]
     \centering
@@ -35,9 +37,20 @@ server specifications (called Frodo) are provided in Table \ref{table:frodo-spec
     \end{tabular}
 \end{table}
 
+The evaluation methodology will start with a baseline of the disk performances, then we will evaluate the \acrshort{nvmeof} performances with Linux kernel. Then we will evaluate the performances of \texttt{lighttpd} original version, and finally we will evaluate the performances of IO-TCP implementation. Metrics will be throughput, latency and CPU usage. The evaluation will be made on Frodo server and on SmartNIC. Tools used for the evaluation are \texttt{\acrfull{fio}} \cite{noauthor_kernelgitaxboefiogit_nodate} for throughput and latency on disks, \texttt{wrk} \cite{glozer_wgwrk_2026} for throughput on \acrshort{http} server, and \texttt{perf} \cite{linux_perf,perfwiki} for CPU usage. 
+
+Several parameters will influence the results of the evaluation. Table \ref{table:workload-summary} shows the summary of the workloads. The first one is file / payload size, which means the size of the file to read or write on disk, or the size of the payload to send over the network. The second one is block size : the amount of data transferred in a single \acrshort{io} operation. Small block size (e.g 4 kB, the typical page and filesystem granularity) exercices the per request overhead of the \acrshort{io} stack (syscall, block layer, etc.) while large block size (e.g 4 MB) amortizes the overhead over many bytes, and is more representative of the disk raw transfer bandwidth capability. We therefore expect throughput to increase with block size up to the device or \acrshort{pcie} link bandwidth limit. The third one is \acrshort{io} depth, which is the number of \acrshort{io} operations that can be submitted to the device before waiting for completion. A higher \acrshort{io} depth allows for better utilization of the device and can improve throughput.. Throughput is expected to increase with \acrshort{io} depth, as well as latency due to queuing delays. The fourth one is the type of \acrshort{io} operation, which can be sequential or random read/write. Sequential operations are expected to have higher throughput and lower latency than random operations. The fifth one is the type of transport used for \acrshort{nvmeof}, which can be \acrshort{tcp} or \acrshort{rdma}. \acrshort{rdma} is expected to have lower latency and higher throughput than \acrshort{tcp} due to its direct memory access capabilities.
+
+\subsection{Tools parameters}
+
+\texttt{\acrshort{fio}} is used to benchmark the disk throughput and latency. It can use different engines to submit \acrshort{io} operations. In this evaluation, we will use \texttt{libaio} \cite{libaio}, a standard Linux kernel asynchronous \acrshort{io} engine, \texttt{io\_uring} \cite{io_uring_manpage,what_is_io_uring}, a newer Linux kernel asynchronous \acrshort{io} interface, and \texttt{spdk\_bdev} \cite{spdk_bdev_user_guide}, a user-space library that bypasses the kernel and directly accesses the device. \texttt{libaio} and \texttt{io\_uring} are kernel-path engines, while \texttt{spdk\_bdev} is a user-space engine. For \texttt{spdk\_bdev}, we use an adapted implementation of \texttt{\acrshort{fio}} \cite{spdk_fio_bdev_readme} to benchmark metrics. 
+
+
+\subsection{Workload summary}
+
 \section{Disks performances baseline}
 
-The first step in the measurements process is to evaluate the \acrfull{io} baseline performances of the disks, with and without \acrshort{spdk}. The first disk is connected to a \acrshort{pcie} 4.0 slot. We will call it disk A. The second disk is connected to a \acrshort{pcie} 3.0 slot. We will call it disk B. We used \texttt{\acrfull{fio}} \cite{noauthor_kernelgitaxboefiogit_nodate} with \texttt{libaio} \cite{libaio} engine to test the throughput of the Linux kernel. Then we'll use \texttt{\acrshort{spdk}} own \acrshort{bdev} \acrfull{aio} engine.
+The first step in the measurements process is to evaluate the \acrfull{io} baseline performances of the disks, with and without \acrshort{spdk}. The first disk is connected to a \acrshort{pcie} 4.0 slot. We will call it disk A. The second disk is connected to a \acrshort{pcie} 3.0 slot. We will call it disk B.
 Specifications of the disks are given in Table \ref{table:disk-specs}. The disks are SOLIDIGM SSDPFKKW010X7. Vendor theoretical speed are found in \cite{solidigm_2026,solidigm_benchmark_nodate,ssdpfkkw010x7x1performance_nodate}. The disks are connected to a \acrshort{pcie} 4.0 x4 and \acrshort{pcie} 3.0 x4 slot respectively. The submission queue is set to 64 bytes and the completion queue is set to 16 bytes. The maximum number of requests is set to 1023. Information about submission queue, completion queue and maximum number of requests have been collected with \texttt{nvme-cli} \cite{noauthor_linux-nvmenvme-cli_2026}.
 
 In the following subsections \ref{subsec:disk-throughput} and \ref{subsec:disk-latency}, we will benchmark the throughput and latency of the disks with different file size, block size and \acrshort{io} depth. This will give us a baseline to compare with the implementation of \acrshort{nvmeof}, \acrshort{spdk}, and finally \textbf{IO-TCP}.
