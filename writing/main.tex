@@ -87,10 +87,15 @@
 \newif\ifshowcomments
 \showcommentstrue
 \definecolor{cmtcolor}{HTML}{C0392B}
+\definecolor{cmtnico}{HTML}{049d1b}
 \newtcbox{\cmtbadge}{on line, colback=cmtcolor, colframe=cmtcolor,
     coltext=white, fontupper=\sffamily\bfseries\scriptsize,
     arc=3pt, boxrule=0pt, boxsep=0pt, left=3pt, right=3pt, top=1.5pt, bottom=1.5pt}
+\newtcbox{\cmtbadgenico}{on line, colback=cmtnico, colframe=cmtnico,
+    coltext=white, fontupper=\sffamily\bfseries\scriptsize,
+    arc=3pt, boxrule=0pt, boxsep=0pt, left=3pt, right=3pt, top=1.5pt, bottom=1.5pt}
 \newcommand{\nt}[1]{\ifshowcomments\cmtbadge{NT}\,{\color{cmtcolor}\sffamily\small\itshape #1}\fi}
+\newcommand{\nj}[1]{\ifshowcomments\cmtbadgenico{NJ}\,{\color{cmtnico}\sffamily\small\itshape #1}\fi}
 \makeglossaries
 \input{acronyms.tex}
 \bibliography{biblio.bib}
@@ -181,6 +186,15 @@
 \chapter{Background} \label{ch:background}
 
     \input{src/background}
+
+
+\chapter{State-of-the-art designs and solutions} \label{ch:sota}
+
+    \input{src/sota.tex}
+
+\chapter{IO-TCP implementation analysis} \label{ch:io-tcp-analysis}
+
+    \input{src/io-tcp-analysis.tex}
 
 \chapter{Implementation} \label{ch:implementation}
 
