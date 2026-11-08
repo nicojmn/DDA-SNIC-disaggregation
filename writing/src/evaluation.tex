@@ -252,7 +252,7 @@ While some configurations are able to exceed the vendor theoretical speed of 6.5
 
 \section{lighttpd performances}
 
-We benchmarked the \acrshort{http} server \texttt{lighttpd} original version (1.4.32) in order to analyze the difference between the original version and the IO-TCP version. The benchmark is made with \texttt{wrk} \cite{glozer_wgwrk_2026}. To be fair with IO-TCP, we restrict the \texttt{lighttpd} to a single core. Figures \ref{fig:lighttpd-x86} and \ref{fig:lighttpd-arm} show the throughput of \texttt{lighttpd} on Frodo server (x86\_64 core) and on SmartNIC (ARM Cortex-A72 core) respectively. We observe that a single core on Frodo is nearly able to saturate the disk bandwidth.
+We benchmarked the \acrshort{http} server \texttt{lighttpd} original version (1.4.32) \cite{lighttpd_1.4.32_news,lighttpd_1.4.32_github} in order to analyze the difference between the original version and the IO-TCP version. The benchmark is made with \texttt{wrk} \cite{glozer_wgwrk_2026}. To be fair with IO-TCP, we restrict the \texttt{lighttpd} to a single core. Figures \ref{fig:lighttpd-x86} and \ref{fig:lighttpd-arm} show the throughput of \texttt{lighttpd} on Frodo server (x86\_64 core) and on SmartNIC (ARM Cortex-A72 core) respectively. We observe that a single core on Frodo is nearly able to saturate the disk bandwidth.
 
 \begin{figure}[htbp]
     \centering
