@@ -1,8 +1,7 @@
-Kernel_io;36.929053
+Kernel_io;44.257635
 Kernel_core;19.272343
 fio_core;17.509533
 Kernel_syscall;12.363112
-SPDK-NVMe;7.328582
 libaio_userspace;2.475326
 fio_engine;2.151814
 Libc;1.207241

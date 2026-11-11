@@ -1,0 +1,41 @@
+# --- Userspace: fio engine backends (libaio, io_uring, spdk, ...) ---
+fio_libaio_|fio_ioring_|fio_spdk_|spdk_fio_ : fio_engine
+
+# --- Userspace: liburing (before libaio and before Kernel_io: shared __io_ prefix) ---
+__io_uring|io_uring_get_sqe|io_uring_prep_|io_uring_submit|io_uring_queue|io_uring_peek_batch|io_uring_wait_cqe|io_uring_cqe_seen : liburing_userspace
+
+# --- Userspace: libaio library ---
+^io_submit$|^io_getevents$|^io_setup$|^io_queue_init$|^io_destroy$|^io_cancel$ : libaio_userspace
+
+# --- Userspace: fio core (engine-agnostic, incl. stats + timing) ---
+fio_|td_|io_u_|do_io|io_completed|account_io_|put_file|get_file|get_next_|add_.*sample|add_lat_percentile|__fio_gettime|fio_gettime|ntime_since|clock_thread_fn|small_content_scramble : fio_core
+
+# --- SPDK bdev layer ---
+bdev : SPDK-bdev
+spdk_mem_map : SPDK-bdev
+
+# --- SPDK NVMe driver ---
+spdk_nvme : SPDK-NVMe
+
+# --- SPDK threading / polling / timing infra ---
+spdk_thread : SPDK-core
+thread_poll : SPDK-core
+msg_queue : SPDK-core
+spdk_get_ticks : SPDK-core
+rte_ : SPDK-core
+__rdtsc : SPDK-core
+
+# --- Userspace: SPDK ---
+spdk_|bdev_|nvme_pcie_|rte_|msg_queue|thread_poll : SPDK_userspace
+
+# --- Userspace: libc ---
+__GI_|__libc_|memmove|memset|memcpy|__clock_|__tls_get_addr : Libc
+
+# --- Kernel: syscall boundary ---
+syscall|entry_SYSCALL_64|__x64_sys_|__do_sys_|__se_sys_ : Kernel_syscall
+
+# --- Kernel: I/O path (AIO, io_uring, block, bio, NVMe, VFS, IRQ) ---
+nvme|aio_|io_submit_one|io_uring|io_submit_sqes|io_submit_flush_completions|blk_|__blk|blkdev_|kthread_blkcg|bio_|submit_bio|nvme_|__nvme_|vfs_|__vfs_|kiocb|generic_file_|iomap_|inode_|filemap_|fsnotify|irq|softirq|apic_ack : Kernel_io
+
+# --- Kernel: core services (mm, GUP, slab, locks, RCU, timers, scheduler) ---
+follow_page|pin_user_pages|get_user_pages|__gup|unpin_user|__unpin|try_grab_compound_head|__get_free_pages|__alloc_pages|free_pages|free_unref_page|rmqueue|__mod_lruvec_state|__mod_node_page_state|mark_page_accessed|folio_|__folio|kmalloc|kfree|kmem_cache_|slab_|mempool_|kmemdup|_raw_spin|_raw_read_lock|_raw_write_lock|queued_spin|native_queued_spin|lock_timer_base|rcu|srcu|synchronize_rcu|hrtimer|clockevents_|tick_|ktime_|sched_clock|__schedule|schedule|finish_task_switch|try_to_wake_up|select_task_rq|ttwu|dequeue_task|enqueue_task : Kernel_core
