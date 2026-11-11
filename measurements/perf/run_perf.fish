@@ -1,5 +1,5 @@
 #!/usr/bin/env fish
-
+source /etinfo/users/2021/njeanmenne/master-thesis/.venv/bin/activate.fish
 argparse e/engine= n/nvme= r/rw= s/size= d/duration= o/output_dir= f/freq= c/cpu= p/pci= m/mixed_params= -- $argv
 or exit 1
 
@@ -68,8 +68,27 @@ if set -q _flag_mixed_params
 end
 
 set timestamp (date +%Y%m%d_%H%M%S)
-set perf_basename "$output_dir/perf_$engine_$size_$rw_$timestamp"
-echo "Writing to: $perf_basename\[.data|.svg|.script\]"
+
+if not test -d "$output_dir"
+    mkdir -p "$output_dir"
+end
+
+if not test -d "$output_dir/csv"
+    mkdir "$output_dir/csv"
+end
+
+if not test -d "$output_dir/pdf"
+    mkdir "$output_dir/pdf"
+end
+
+set base perf_(string join _ $engine $size $rw $timestamp)
+
+set perf_basename "$output_dir/$base"
+set csv_file "$output_dir/csv/$base"
+set pdf_file "$output_dir/pdf/$base"
+set title "Perf results for $rw operations ($engine, "$size"MB)"
+
+echo "Writing to: $perf_basename\[.data|.script\]"
 
 if test "$engine" = spdk_bdev
     # Check if nvme flag was provided
@@ -166,11 +185,8 @@ sudo sysctl -q kernel.perf_event_paranoid=-1
 
 sudo perf record -F $freq -g --call-graph dwarf -o "$perf_basename.data" -- $fio_cmd
 
-if not set -q FLAMEGRAPH
-    echo "Warning: FLAMEGRAPH environment variable not set"
-    set FLAMEGRAPH ~/FlameGraph
-end
-
-sudo perf script -i "$perf_basename.data" | $FLAMEGRAPH/stackcollapse-perf.pl | $FLAMEGRAPH/flamegraph.pl --title "FIO ($engine) $rw with $size MB flame graph" >"$perf_basename.svg"
-
 sudo perf script -i "$perf_basename.data" >"$perf_basename.script"
+
+perf-class $perf_basename.script --map ./kernel_simplified.map --min 0.5 >$csv_file
+
+uv run ./plot_perf_class.py "$csv_file" -o "$pdf_file" --title $title

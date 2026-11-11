@@ -6,7 +6,7 @@ spdk_bdev fio [mode] benchmark
 %config
 
 n_runs=5
-var_names={BANDWIDTH:Throughput,ENGINE:I/O engine,SIZE:File size (MB),IO_BYTES:Bytes read/written,IOPS:IOPS,LAT_MEAN_NS:Mean latency,LAT_P99_NS:p99 latency,LAT_P999_NS:p99.9 latency,LAT_P9999_NS:p99.99 latency,LAT_STDDEV_NS:Latency stddev,SLAT_MEAN_NS:Mean submission latency,USR_CPU:User CPU,SYS_CPU:System CPU}
+var_names={BANDWIDTH:Throughput,ENGINE:I/O engine,SIZE:Raw block size (MB),IO_BYTES:Bytes read/written,IOPS:IOPS,LAT_MEAN_NS:Mean latency,LAT_P99_NS:p99 latency,LAT_P999_NS:p99.9 latency,LAT_P9999_NS:p99.99 latency,LAT_STDDEV_NS:Latency stddev,SLAT_MEAN_NS:Mean submission latency,USR_CPU:User CPU,SYS_CPU:System CPU}
 var_unit={BANDWIDTH:B/s,SIZE:B,IO_BYTES:B,IOPS:ops,LAT_MEAN_NS:ns,LAT_P99_NS:ns,LAT_P999_NS:ns,LAT_P9999_NS:ns,LAT_STDDEV_NS:ns,SLAT_MEAN_NS:ns,USR_CPU:%,SYS_CPU:%}
 var_divider={BANDWIDTH:1,SIZE:0.000001,IO_BYTES:1,IOPS:1,LAT_MEAN_NS:1000,LAT_P99_NS:1000,LAT_P999_NS:1000,LAT_P9999_NS:1000,LAT_STDDEV_NS:1000,SLAT_MEAN_NS:1000}
 var_format={BANDWIDTH:eng.2.B/s,SIZE:eng.0.B,IO_BYTES:eng.2.B,IOPS:eng.2,LAT_MEAN_NS:eng.2.µs,LAT_P99_NS:eng.2.µs,LAT_P999_NS:eng.2.µs,LAT_P9999_NS:eng.2.µs,LAT_STDDEV_NS:eng.2.µs,SLAT_MEAN_NS:eng.2.µs,USR_CPU:%.1f,SYS_CPU:%.1f}

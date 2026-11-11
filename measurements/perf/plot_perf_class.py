@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser()
 parser.add_argument("input_file")
 parser.add_argument("--title", default="Distribution")
-parser.add_argument("--min-pct", type=float, default=0.5)
+parser.add_argument("--min-pct", type=float, default=5.0)
 parser.add_argument("-o", "--output", default=None)
 args = parser.parse_args()
 
