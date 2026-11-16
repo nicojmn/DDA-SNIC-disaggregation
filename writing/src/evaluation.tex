@@ -177,6 +177,27 @@ While some configurations are able to exceed the vendor theoretical speed of 6.5
     Previous results show that kernel-path engines are impacted by the block size. We can compute the \acrfull{iops}  by dividing the throughput by the block size. Below are graphs showing the \acrshort{iops} reported by \acrshort{fio}. The results show that \acrshort{spdk} is able to achieve higher \acrshort{iops} than kernel-path engines, especially at small block size. This is due to the fact that \acrshort{spdk} bypasses the kernel and directly accesses the device, while kernel-path engines have to go through the kernel, which adds overhead.
 
     % \CatchFileDef{\iopsreadfourk}{../measurements/npf/experiments/spdk/read_iops_4k.tex}{}
+    \nt{I think a plot would be better than a table here}
+    \begin{table}[htbp]
+        \centering
+        \caption{Average \acrshort{iops} for all operations with 4kB and 4MB block size}
+        \label{tab:stats-iops}
+            \begin{tabularx}{\columnwidth}{@{}l l X X X@{}}
+            \toprule
+            \textbf{Block size} & \textbf{Operations} & \texttt{io\_uring} & \texttt{libaio} & \texttt{spdk\_bdev}\\
+            \midrule
+            \textbf{4kB} & Sequential Read & 397.03 kIOPS & 374.2 kIOPS & 1.56 MIOPS \\
+            \textbf{4kB} & Random Read & 382.62 kIOPS & 355.03 kIOPS & 742.92 kIOPS \\
+            \textbf{4kB} & Sequential Write & 397.03 kIOPS & 374.2 kIOPS & 1.56 MIOPS \\
+            \textbf{4kB} & Random Write & 361.5 kIOPS & 339.55 kIOPS & 590.92 kIOPS \\
+            \midrule
+            \textbf{4MB} & Sequential Read & 384.53 IOPS & 362.57 IOPS & 753.92 kIOPS \\
+            \textbf{4MB} & Random Read & 822.49 IOPS & 834.12 IOPS & 1.46 kIOPS \\
+            \textbf{4MB} & Sequential Write & 750.63 IOPS & 767.51 IOPS & 1.68 kIOPS \\
+            \textbf{4MB} & Random Write & 750.63 IOPS & 767.51 IOPS & 1.68 kIOPS \\
+            \bottomrule
+            \end{tabularx}
+    \end{table}
 
     % \begin{table}[htbp]
     %     \centering
@@ -217,6 +238,13 @@ While some configurations are able to exceed the vendor theoretical speed of 6.5
         \caption{Perf of sequential write operations with 4kB block size and 4MB raw block size with SPDK}
         \label{fig:perf-write-spdk-4k-4M}
     \end{figure}
+
+    
+    For example, for sequential read operations with 4kB block size, \acrshort{spdk} achieves on average 753.92 k\acrshort{iops} while kernel-path engines achieve on average 362.57 k\acrshort{iops} for \texttt{libaio} and 384.53 k\acrshort{iops} for \texttt{io\_uring}, nearly 2 times less. For 4MB block size, \acrshort{spdk} got on average 1.5 K\acrshort{iops} while \texttt{io\_uring} got 880.83 \acrshort{iops} and \texttt{libaio} got 878.34 \acrshort{iops}, nearly 1.7 times less.
+    
+    Figures \ref{fig:perf-write-4k-1M} and \ref{fig:perf-write-4k-4M} show the \texttt{perf} of sequential write operations with 4kB block size and 1MB or 4MB file size respectively. Up to 20 \% of the CPU time is spent on system calls. Detailed classification of the CPU time is available in table \ref{tab:perf-categories}.
+    \nt{Analysis is a bit short here, I would expand here, what do you conclude?}
+    \nt{Also i would put the two bars (LIBIO and SPDK) in a single plot}
 
 \subsection{SLC cache} \label{subsec:slc-caching}
 
