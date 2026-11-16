@@ -793,3 +793,86 @@
 	urldate = {2026-11-08},
 	file = {SPDK\: Block Device User Guide:/home/nicolas/Zotero/storage/W6Y7VHVH/bdev.html:text/html},
 }
+
+
+@inproceedings{kim_nvme-over-quic_2026,
+	title = {{NVMe}-over-{QUIC}: Towards Simplifying Secure {NVMe} Fabrics for Disaggregation over Unreliable Networks},
+	volume = {34},
+	url = {https://research.dial.uclouvain.be/entities/publication/88eb6987-1828-45a2-a224-3d1b7fe367dd},
+	shorttitle = {{NVMe}-over-{QUIC}},
+	abstract = {With the growing adoption of disaggregated storage, {NVMe} over Fabrics over {TCP} has emerged as a practical remote storage solution for enterprise and cloud environments, avoiding the managed lossless networks typically required by {RDMA}-based deployments. However, neither {NVMe}/{TCP} nor {NVMe}/{RDMA} provides an efficient built-in security mechanism for protecting storage traffic against eavesdropping in modern data centers and {WAN} deployments. While {NVMe}/{TCP} can be secured using {TLS}, layering {TLS} over {TCP} increases {CPU} overhead and is subject to {TCP} head-of-line blocking under lossy or high-latency conditions. This paper presents {NVMe}-over-{QUIC}, a redesign of {NVMe}-{oF} around a secure, message-oriented, multiplexed transport. Our key insight is to map each {NVMe} I/O request onto an independent {QUIC} stream, eliminating redundant framing and enabling true per-command isolation without cross-command head-of-line blocking. By integrating transport and encryption within {QUIC}, our design also avoids the inefficiencies of {TLS} over {TCP}. To preserve scalability on multi-core systems, we design a {UDP}-based core-affinity architecture aligned with high-performance storage processing models. Evaluation results show up to 4× higher throughput and 10× lower latency under lossy network conditions.},
+	eventtitle = {{IEEE} {ICNP} 2026},
+	booktitle = {34th {IEEE} International Conference on Network Protocols},
+	author = {Kim, Soyong and Barbette, Tom},
+	urldate = {2026-11-11},
+	date = {2026-10-05},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/CQZ78BE2/Kim and Barbette - 2026 - NVMe-over-QUIC Towards Simplifying Secure NVMe Fabrics for Disaggregation over Unreliable Networks.pdf:application/pdf},
+}
+
+
+@online{noauthor_bdevperfnumber_2026,
+	title = {[bdevperf]number of executed cpus doesn't match the setting of cpu core mask · Issue \#1116 · spdk/spdk},
+	url = {https://github.com/spdk/spdk/issues/1116},
+	abstract = {We run bdevperf with {SPDK} bdev to test local {NVMe} {SSD} using following command line: ./bdevperf -w randread -o 4096 -q 32 -t 300 -s 1024 -c /usr/src/spdk/examples/bdev/fio\_plugin/bdev.conf.in -m 0xF...},
+	titleaddon = {{GitHub}},
+	urldate = {2026-11-15},
+	langid = {english},
+	file = {Snapshot:/home/nicolas/Zotero/storage/X8TXTMMV/1116.html:text/html},
+}
+
+
+
+@online{perf-class-github,
+	title = {tbarbette/perf-class: Python parser for Linux Perf profiler to group symbols into classes},
+	url = {https://github.com/tbarbette/perf-class/},
+	urldate = {2026-11-15},
+}
+
+
+@inproceedings{ruan_quicksand_2025,
+	title = {Quicksand: Harnessing Stranded Datacenter Resources with Granular Computing},
+	isbn = {978-1-939133-46-5},
+	url = {https://www.usenix.org/conference/nsdi25/presentation/ruan},
+	shorttitle = {Quicksand},
+	eventtitle = {22nd {USENIX} Symposium on Networked Systems Design and Implementation ({NSDI} 25)},
+	pages = {147--165},
+	author = {Ruan, Zhenyuan and Li, Shihang and Fan, Kaiyan and Park, Seo Jin and Aguilera, Marcos K. and Belay, Adam and Schwarzkopf, Malte},
+	urldate = {2026-11-15},
+	date = {2025},
+	langid = {english},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/PCIIFX6Z/Ruan et al. - 2025 - Quicksand Harnessing Stranded Datacenter Resources with Granular Computing.pdf:application/pdf},
+}
+
+
+@inproceedings{klimovic_flash_2016,
+	location = {New York, {NY}, {USA}},
+	title = {Flash storage disaggregation},
+	isbn = {978-1-4503-4240-7},
+	url = {https://dl.acm.org/doi/10.1145/2901318.2901337},
+	doi = {10.1145/2901318.2901337},
+	series = {{EuroSys} '16},
+	abstract = {{PCIe}-based Flash is commonly deployed to provide datacenter applications with high {IO} rates. However, its capacity and bandwidth are often underutilized as it is difficult to design servers with the right balance of {CPU}, memory and Flash resources over time and for multiple applications. This work examines Flash disaggregation as a way to deal with Flash overprovisioning. We tune remote access to Flash over commodity networks and analyze its impact on workloads sampled from real datacenter applications. We show that, while remote Flash access introduces a 20\% throughput drop at the application level, disaggregation allows us to make up for these overheads through resource-efficient scale-out. Hence, we show that Flash disaggregation allows scaling {CPU} and Flash resources independently in a cost effective manner. We use our analysis to draw conclusions about data and control plane issues in remote storage.},
+	pages = {1--15},
+	booktitle = {Proceedings of the Eleventh European Conference on Computer Systems},
+	publisher = {Association for Computing Machinery},
+	author = {Klimovic, Ana and Kozyrakis, Christos and Thereska, Eno and John, Binu and Kumar, Sanjeev},
+	urldate = {2026-11-14},
+	date = {2016-04-18},
+	keywords = {datacenter, flash, network storage},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/AT9L4NX2/Klimovic et al. - 2016 - Flash storage disaggregation.pdf:application/pdf},
+}
+
+
+@inproceedings{gao_network_2016,
+	title = {Network Requirements for Resource Disaggregation},
+	isbn = {978-1-931971-33-1},
+	url = {https://www.usenix.org/conference/osdi16/technical-sessions/presentation/gao},
+	eventtitle = {12th {USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 16)},
+	pages = {249--264},
+	author = {Gao, Peter X. and Narayan, Akshay and Karandikar, Sagar and Carreira, Joao and Han, Sangjin and Agarwal, Rachit and Ratnasamy, Sylvia and Shenker, Scott},
+	urldate = {2026-11-15},
+	date = {2016},
+	langid = {english},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/68ENX5BR/Gao et al. - 2016 - Network Requirements for Resource Disaggregation.pdf:application/pdf},
+}
+

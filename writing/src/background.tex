@@ -1,43 +1,27 @@
-This chapter provides an overview of disaggregated datacenter architectures and smartNIC-to-storage interactions.  We will first give an overview of
-the main concepts and definitions used in the literature, then we will review the main
-architectural challenges and solutions proposed by researchers. Finally, we will list some
-unresolved challenges that we aim to solve in this thesis.
+High-performance disaggregated storage rely on a tightly coupled pipeline bridging storage media, network interfaces and protocols, and specialized software stacks. This chapter provides the definition of the main concepts and terms used in this thesis, from local storage to disaggregated storage, and from the software stack to the networking protocols used to access remote storage. 
 
 ~\nt{What is a SmartNIC, how does it fit in a disagragated architecture?}
 
-\section{Overview of concepts and definitions}
 
-High-performance disaggregated storage rely on a tightly coupled pipeline bridging storage media, network interfaces and protocols, and specialized software stacks. To understand the challenges and solutions proposed in the literature, it is important to first define the main concepts layer by layer.
+\section{Storage medium and local storage interface}
 
-% New kind of hardware components have emerged, \acrfull{ssd} are replacing traditional \acrfull{hdd}  
-% These trends have enabled researchers and companies to explore new approaches to \acrfull{hpc}. Modern \acrshort{ssd}s use the \acrfull{nvme} protocol, a low-latency, high-throughput interface designed for flash storage. \acrshort{nvme} devices can be accessed over the network using \acrfull{nvmeof}, which extends the \acrlong{nvme} command set to support network fabrics (smartNICs, \dots) \cite{noauthor_nvme_2021, noauthor_what_nodate, guz_nvme-over-fabrics_2017}. Such advancements made it possible to design new architecture designs, such as disaggregated datacenters. 
+A traditional \acrfull{hdd} is a mechanical device that stores data on spinning magnetic disks. To read or write data, the drive must physically move a mechanical arm, the read/write head, to the correct track and wait for the disk to rotate to the correct position. These mechanical movements, called seek time and rotational latency take each a few milliseconds, which limits the throughput and increases access time. Typical throughput of a \acrshort{hdd} is around 100 MB/s and one hundred requests per second.  In contrast, a \acrfull{ssd} is a device that stores data on non-volatile flash memory and contains no moving parts : accessing data is a purely electronic operation that takes tens of microseconds. Modern \acrshort{ssd}s can achieve throughput of several GB/s and hundreds of thousands to millions of requests per second, depending on how those devices are connected to the system. \acrshort{ssd}s are therefore suitable for high-performance applications as they provide better performance than \acrshort{hdd}s. \cite{mecheloni_inside_2018, haas_what_2023}
 
-% Writing efficient storage applications involves understanding the role of \acrfull{spdk}. \acrshort{spdk} is a set of tools and libraries for building high-performance storage applications, particularly those that interact with \acrshort{nvme} devices. It provides a user-space driver that bypasses the kernel, allowing for lower latency and higher throughput compared to traditional kernel-based drivers \cite{noauthor_storage_nodate}. This development kit will be used in this thesis to implement and evaluate our proposed solutions, as detailed in the next chapters.
 
-\subsection{Storage medium and interface}
+This speedup has a consequence that motivates this thesis : the low latency and high parallelism of modern NVMe SSDs can expose substantial overheads in host software and networking. Consequently, the bottleneck may shift between the storage device, CPU, PCIe fabric, and network depending on the workload and system configuration. With several millions of requests per second, the machine must process one request every few hundred nanoseconds, and the software layers such as system calls, the kernel block layer, interrupts, \dots become the new bottleneck. Understanding the storage medium and its interface is therefore crucial to design high-performance storage applications.
 
-% A traditional \acrfull{hdd} is a mechanical device that stores data on spinning magnetic disks. Its performance is bounded by mechanical seek time and rotational latency, which limits its throughput and increases access time. In contrast, a \acrfull{ssd} is an electronic device that stores data on non-volatile flash memory. \cite{mecheloni_inside_2018}
-
-% \subsubsection{Peripheral Component Interconnect Express}
-
-% Pas oublier de faire le lien avec PCIe 5 / 6 pour en parler avec ZeroNIC.
-
-A traditional \acrfull{hdd} is a mechanical device that stores data on spinning magnetic disks. To read or write data, the drive must physically move a mechanical arm, the read/write head, to the correct track and wait for the disk to rotate to the correct position. These mechanical movements, called seek time and rotational latency take each a few milliseconds, which limits the throughput and increases access time. Typical throughput of a \acrshort{hdd} is around 100 MB/s and one hundred requests per second.  In contrast, a \acrfull{ssd} is a device that stores data on non-volatile flash memory and contains no moving parts : accessing data is a purely electronic operation that takes tens of microseconds. Modern \acrshort{ssd}s can achieve throughput of several GB/s and hundreds of thousands to millions of requests per second, depending on how those devices are connected to the system. \acrshort{ssd}s are therefore suitable for high-performance applications as they are a thousand to ten thousand times faster than \acrshort{hdd}s. \cite{mecheloni_inside_2018, haas_what_2023}
-
-This speedup has a consequence that motivates this thesis : the storage medium is no longer the bottleneck in the data path nor the slowest component in the system. With several millions of requests per second, the machine must process one request every few hundred nanoseconds, and the software layers such as system calls, the kernel block layer, interrupts, \dots become the new bottleneck. Understanding the storage medium and its interface is therefore crucial to design high-performance storage applications.
-
-\subsubsection{Flash memory behavior}
+\subsection{Flash memory behavior}
 
 Flash memory stores data in pages of a few kilobytes, which are grouped into blocks of a few megabytes. A page can be written only once before it must be erased, and an erase operation can only be performed on a whole block, so an \acrshort{ssd} cannot overwrite data in place. This behavior is called the \textit{erase-before-write}, and an internal controller is responsible to write data to a new page and erase old pages in the background. This behavior has direct consequences that reappear in chapter \ref{ch:evaluation} : write operations are slower and more complex than read operations, and continuous write throughput can drop if the \acrfull{slc} cache is exhausted. A \acrshort{slc} cache is a small portion of the \acrshort{ssd} that is used to store data in a single-level cell mode, which is faster than \acrshort{tlc} or \acrshort{qlc} used for the rest of the device. When the \acrshort{slc} cache is full, the \acrshort{ssd} must write data directly to the slower \acrshort{tlc}/\acrshort{qlc} area, which can cause a significant drop in write throughput.
 
 
-\subsubsection{PCI Express and NVMe}
+\subsection{PCI Express and NVMe}
 
 An \acrshort{ssd} can be connected to a computer through several interfaces, such as \acrshort{sata}, \acrshort{sas}, or \acrshort{pcie}. \acrshort{sata} and \acrshort{sas} are legacy interfaces that were designed for \acrshort{hdd}s, and are therefore limited in terms of throughput. Modern systems connect \acrshort{ssd}s to the processor over \acrfull{pcie}, a high-speed point-to-point interconnect that allows for low-latency, high-throughput communication between devices .\acrshort{pcie} has evovled into several generations, \acrshort{pcie} 3.0 transfers rougly 1 GB/s per lane, \acrshort{pcie} 4.0 about 2 GB/s per lane, \acrshort{pcie} 5.0 about 4 GB/s per lane, and \acrshort{pcie} 6.0 about 8 GB/s per lane \cite{pcie-1-5-bit-rates,pcie-6-specs}. A typical \acrshort{ssd} or \acrfull{nic} uses four lanes (x4) so \acrshort{pcie} 4.0 provides a total throughput of about 8 GB/s. The \acrshort{pcie} generation and lanes count thus determine the hard ceiling a storage device or network interface can achieve. \acrshort{pcie} also allows for \acrfull{dma} to and from devices, which allows for direct memory access without CPU involvement, further reducing latency and improving throughput.
 
 \begin{figure}[htbp]
 	\centering
-	\adjustbox{max width=0.85\columnwidth}
+	\adjustbox{max width=0.85\columnwidth, max height=0.5\textheight}
 	{\input{src/img/NVMe.tex}}
 	\caption{Illustration of the NVMe command submission and completion process. The host CPU enqueues commands in the \acrshort{sq}, notifies the controller via a doorbell register, and the controller fetches commands using \acrshort{dma}. Data is transferred between the host and controller using DMA, and upon completion, the controller writes a completion entry to the \acrshort{cq} and signals the host with an interrupt.}
 	\label{fig:NVMe-schema}
@@ -47,65 +31,84 @@ An \acrshort{ssd} can be connected to a computer through several interfaces, suc
 
 \acrfull{nvme} is a protocol designed for high-speed communication with non-volatile storage devices, such as \acrshort{ssd}s. It provides a low-latency, high-throughput interface that allows multiple commands to be processed in parallel, making it well-suited for modern storage applications. \acrshort{nvme} uses queues to manage commands and completions. Commands are submitted to the \acrshort{ssd} through \acrfull{sq}s, the \acrshort{ssd} fetches the request from main memory using \acrshort{dma}, processes the request, and places the result in a \acrfull{cq}, ready to be picked up by the host. Many queues can exist in parallel, and each queue can hold multiple commands. This queuing model is what exposes the internal parallelism of the flash chips to the host. Since a single request takes tens of microseconds, reaching millions of requests per second requires keeping hundreds of requests in flight simultaneously. The number of outstanding requests is called the \acrshort{io} depth, and it is a key parameter of our evaluation methodology in chapter \ref{ch:evaluation}. Figure \ref{fig:NVMe-schema} illustrates the \acrshort{nvme} command process.
 
-Finally, \acrshort{nvme} was originally designed for locally attached devices over \acrshort{pcie}. The protocol has been extended to operate over \acrfull{nvmeof}, which we discuss in section \ref{sec:nvmeof}, as it is central to the SmartNIC architecture studied in this thesis.
+Finally, \acrshort{nvme} was originally designed for locally attached devices over \acrshort{pcie}. The protocol has been extended to operate over \acrfull{nvmeof}, which we discuss in section \ref{sec:network-remote-storage}, as it is central to the SmartNIC architecture studied in this thesis.
 
-\subsection{Network} \label{sec:nvmeof}
+
+\section{Disaggregated architectures} \label{sec:disaggregated-arch}
+
+A server contains several hardware resources, such as \acrshort{cpu}, \acrshort{ram}, \acrshort{ssd}, and a \acrfull{nic}. On a convential server archictecture, these resources are physically integrated into a single machine, which is called a \acrfull{ma}. Consequently, the resources are tightly coupled and cannot be shared between servers. A major limitation of this architecture is resource stranding: when one resource is exhausted, other resources on the same server may remain underutilized, leading to waste \cite{ruan_quicksand_2025}. \acrshort{pcie}-based storage devices such as \acrshort{ssd}s are particularly prone to underutilization \cite{klimovic_flash_2016}.  When local applications do not fully use these resources, they remain idle even if other servers require additional storage.
+
+Disaggregation is an architecture design that separates hardware resources that would conventionally be located within a single server. The different resources are grouped into dedicated nodes that communicate over a high-speed network \cite{gao_network_2016}. This design allows resources to be allocated on demand, and can improve utilization and scalability \cite{lin_disaggregated_2020}, but it also moves operations that were previously local to the server to the network, which can introduce new bottlenecks and challenges. On a local server, the access time between hardware components is typically in the order of tens of nanoseconds for \acrshort{cpu}-memory communication, and tens of microseconds for \acrshort{cpu}-storage communication. \nj{This doesn't need citation right ? Since this is a well known fact in computer architecture.} In a disaggregated architecture, the network becomes the central communication path between resource nodes, which can create strict latency and bandwidth requirements. Thus, the design of disaggregated architectures must carefully consider the trade-offs between resource allocation flexibility and the performance overhead introduced by network communication.
+
+\subsection{Partial disaggregation}
+
+
+Disaggregation can be implemented in several ways, depending on which resources are separated from the server. In a \textit{partially disaggregated architecture}, only selected resources are separated from the server, while other resources remain integrated together. 
+Storage disaggregation is a common example : applications and their main memory remain on compute nodes, while storage devices are attached to separate storage nodes. Figure \ref{fig:storage-disaggregation} illustrates such configuration.
+
+\begin{figure}[htbp]
+	\centering
+	\adjustbox{max width=0.85\columnwidth, max height=0.5\textheight}{
+	\input{src/img/partial-storage-disa.tex}}
+	\caption{Partial disaggregation architecture where storage is in a dedicated node, while compute and memory remain integrated together}
+	\label{fig:storage-disaggregation}
+\end{figure}
+
+\subsubsection{Scope of this thesis}
+This thesis focuses on partial storage disaggregation, in which compute and memory remain on the host while storage is accessed remotely. Section describes this architecture, its benefits and costs, and the processing required on both sides of the network.
+
+\subsection{Full disaggregation}
+
+In a fully disaggregated architecture, each resource type is grouped into dedicated clusters that communicate over the network. Figure \ref{fig:full-disaggregation} illustrates a fully disaggregated architecture where compute, memory, and storage are in dedicated nodes. This design allows for more flexible resource allocation, as each resource type can be scaled independently based on demand. However, it also introduces new challenges in the same way as partial disaggregation, as the network becomes the central communication path between resource clusters, which can create strict latency and bandwidth requirements. \cite{lin_disaggregated_2020}.
+
+\begin{figure}[htbp]
+	\centering
+	\adjustbox{max width=0.85\columnwidth, max height=0.5\textheight}{
+	\input{src/img/full_disa.tex}}
+	\caption{Fully disaggregated architecture where each resource type is in a dedicated node}
+	\label{fig:full-disaggregation}
+\end{figure}
+
+
+\section{Storage Disaggregation} \label{sec:storage-disaggregation}
+
+
+\section{Software stack}
+
+
+\section{Networking for remote storage} \label{sec:network-remote-storage}
 
 % High-speed network communication is a critical aspect of disaggregated architectures. \acrfull{rdma} \cite{rdma_rfc} \cite{rdma_consortium} is a protocol that allows one computer to access memory on another computer without CPU involvement, providing high throughput and low latency. \acrfull{roce} \cite{roce_nvidia_docs} is a variant of \acrshort{rdma} that operates over Ethernet networks, making it more widely compatible with existing infrastructure.
 
+\section{SmartNICs}
 
-\subsection{Disaggregation}
-
-% This thesis uses \textit{disaggregation} to denote an architecture in which hardware resources such as compute, memory,
-% accelerators, and storage are split into pools (or nodes) interconnected through a high-speed network. This design allows
-% resources to be allocated on demand, improving utilization and availability. Two levels are commonly distinguished.
-% \textit{Partial disaggregation} separates storage from compute and memory, which remain integrated together, this level has
-% already been widely implemented since the early 2020s. \textit{Full disaggregation} groups each resource type into dedicated
-% clusters that communicate over the network. \cite{lin_disaggregated_2020}. Figures \ref{fig:partial-disaggregation} and \ref{fig:full-disaggregation} illustrate these two levels of disaggregation.
+\section{Software stacks}
 
 
-\begin{figure}[H]
-	\centering
-	\begin{minipage}{0.48\linewidth}
-		\centering
-		\includesvg[width=0.8\linewidth]{src/img/partial_disa.svg}
-		\caption{Partial disaggregation architecture}
-		\label{fig:partial-disaggregation}
-	\end{minipage}
-	\begin{minipage}{0.48\linewidth}
-		\centering
-		\includesvg[width=0.8\linewidth]{src/img/full_disa.svg}
-		\caption{Full disaggregation architecture}
-		\label{fig:full-disaggregation}
-	\end{minipage}
-\end{figure}
 
-\subsection{Software stack}
+% \section{Architectural challenges}
 
+% {\color{red} I did not modify this section, you can skip it, I plan to rewrite it later.}
 
-\section{Architectural challenges}
+% Architectural challenges can be grouped into two categories:
 
-{\color{red} I did not modify this section, you can skip it, I plan to rewrite it later.}
+% \begin{itemize}
+% 	\item Limitations of traditional monolithic servers, which motivate the transition toward disaggregated architectures.
+% 	\item New challenges introduced by disaggregation, which break assumptions commonly made in earlier systems research and require new design approaches.
+% \end{itemize}
 
-Architectural challenges can be grouped into two categories:
+% \nt{This is too short and it lacks paper citations}
 
-\begin{itemize}
-	\item Limitations of traditional monolithic servers, which motivate the transition toward disaggregated architectures.
-	\item New challenges introduced by disaggregation, which break assumptions commonly made in earlier systems research and require new design approaches.
-\end{itemize}
+% \subsection{Monolithic challenges}
 
-\nt{This is too short and it lacks paper citations}
+% The main limitation of \acrfull{ma} is \textbf{resource stranding}. When one resource is exhausted (for example, memory), other resources on the same server may remain underutilized, leading to waste.
 
-\subsection{Monolithic challenges}
+% Another important issue in \acrfull{ma} is availability under failures. A single hardware failure can impact the whole server and make it unavailable.
 
-The main limitation of \acrfull{ma} is \textbf{resource stranding}. When one resource is exhausted (for example, memory), other resources on the same server may remain underutilized, leading to waste.
+% Finally, hardware replacement and upgrades in \acrfull{ma} often require costly maintenance operations.
 
-Another important issue in \acrfull{ma} is availability under failures. A single hardware failure can impact the whole server and make it unavailable.
+% \subsection{Disaggregation challenges}
 
-Finally, hardware replacement and upgrades in \acrfull{ma} often require costly maintenance operations.
+% In disaggregated architecture (\acrfull{da}), the network becomes the central communication path between resource clusters. This creates strict latency and bandwidth requirements: \acrshort{cpu}-storage communication typically tolerates millisecond-scale delays, whereas \acrshort{cpu}-memory communication requires nanosecond-scale delays (around 100 ns) \cite{lin_disaggregated_2020}.
 
-\subsection{Disaggregation challenges}
-
-In disaggregated architecture (\acrfull{da}), the network becomes the central communication path between resource clusters. This creates strict latency and bandwidth requirements: \acrshort{cpu}-storage communication typically tolerates millisecond-scale delays, whereas \acrshort{cpu}-memory communication requires nanosecond-scale delays (around 100 ns) \cite{lin_disaggregated_2020}.
-
-Current network stacks also expose strong flexibility-performance trade-offs.~\nt{Explain a bit what is RDMA and what is RoCE} \acrshort{rdma} and \acrfull{roce} offer high performance but limited flexibility due to hardware coupling. In addition, \acrshort{rdma} can suffer from head-of-line blocking, congestion, and vendor lock-in because its requirements are not always satisfied by commodity hardware. By contrast, Linux \acrshort{tcp} is more flexible~\nt{This is too vague} but delivers lower performance and less efficient \acrshort{cpu} utilization \cite{skiadopoulos_high-throughput_2024}.
+% Current network stacks also expose strong flexibility-performance trade-offs.~\nt{Explain a bit what is RDMA and what is RoCE} \acrshort{rdma} and \acrfull{roce} offer high performance but limited flexibility due to hardware coupling. In addition, \acrshort{rdma} can suffer from head-of-line blocking, congestion, and vendor lock-in because its requirements are not always satisfied by commodity hardware. By contrast, Linux \acrshort{tcp} is more flexible~\nt{This is too vague} but delivers lower performance and less efficient \acrshort{cpu} utilization \cite{skiadopoulos_high-throughput_2024}.

@@ -1,0 +1,47 @@
+\begin{tikzpicture}[font=\small]
+
+    % Conventional server
+    \node[boxtitle] at (0,1.75) {Conventional server};
+    \node[panel, minimum width=3.8cm, minimum height=2.5cm]
+        (server) at (0,0) {};
+    \node[mem, minimum width=2.8cm, minimum height=0.7cm]
+        at (0,0.45) {CPUs and memory};
+    \node[mem, minimum width=2.8cm, minimum height=0.7cm]
+        at (0,-0.55) {Local NVMe SSDs};
+
+    % Compute node
+    \node[panel, minimum width=3.0cm, minimum height=2.5cm]
+        (compute) at (5.2,0) {};
+    \node[boxtitle] at (5.2,0.75) {Compute node};
+    \node[mem, minimum width=2.2cm, minimum height=0.7cm]
+        at (5.2,-0.25) {CPUs};
+
+    % Memory node
+    \node[panel, minimum width=3.0cm, minimum height=2.5cm]
+        (memory) at (8.4,0) {};
+    \node[boxtitle] at (8.4,0.75) {Memory node};
+    \node[mem, minimum width=2.2cm, minimum height=0.7cm]
+        at (8.4,-0.25) {DRAM};
+
+    % Storage node
+    \node[panel, minimum width=3.0cm, minimum height=2.5cm]
+        (storage) at (11.6,0) {};
+    \node[boxtitle] at (11.6,0.75) {Storage node};
+    \node[mem, minimum width=2.2cm, minimum height=0.7cm]
+        at (11.6,-0.25) {NVMe SSDs};
+
+    % Shared network
+    \node[mem, minimum width=9.4cm, minimum height=0.7cm,
+          font=\small\bfseries]
+        (network) at (8.4,-2.3) {High-speed network};
+
+    % Network connections
+    \draw[bi] (compute.south) -- (compute.south |- network.north);
+    \draw[bi] (memory.south)  -- (memory.south  |- network.north);
+    \draw[bi] (storage.south) -- (storage.south |- network.north);
+
+    % Architecture title
+    \node[boxtitle] at (8.4,1.75)
+        {Fully disaggregated architecture};
+
+\end{tikzpicture}
