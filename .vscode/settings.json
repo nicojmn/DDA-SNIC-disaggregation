@@ -9,5 +9,5 @@
   ],
   "latex-workshop.latex.outDir": "%DIR%",
   "latex-workshop.intellisense.biblatexJSON.replace": {},
-  "latex-workshop.latex.autoBuild.run": "onFileChange"
+  "latex-workshop.latex.autoBuild.run": "never"
 }
