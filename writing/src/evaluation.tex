@@ -281,26 +281,78 @@ While some configurations are able to exceed the vendor theoretical speed of 6.5
 
 \section{NVMe-over-Fabrics performances}
 
-    In this section we evaluate the throughput and latency of NVMe-over-Fabrics with Linux kernel on disk A. The tests evaluate both \acrshort{tcp} and \acrshort{rdma} transport. The tests are made with \texttt{\acrshort{fio}} \cite{noauthor_kernelgitaxboefiogit_nodate} with \texttt{io\_uring} engine. Queue depth is fixed to 64.
+    In this section we evaluate the throughput and latency of NVMe-over-Fabrics with Linux kernel and \acrshort{spdk} software stack on disk A. The tests evaluate both \acrshort{tcp} and \acrshort{rdma} transport. The tests are made with \texttt{\acrshort{fio}}~\cite{noauthor_kernelgitaxboefiogit_nodate} with \texttt{io\_uring} engine for Linux kernel and \texttt{spdk\_bdev} engine for \acrshort{spdk}. Queue depth is fixed to 64.
 
-    \subsection{Throughput}
+\subsection{Kernel setup}
 
-        \begin{figure}[htbp]
+    To be able to benchmark the \acrshort{nvmeof} performance with Linux kernel, we need to setup a \acrshort{nvmeof} target with the \texttt{nvmet} kernel module. Then we can use \texttt{nvme-cli} to connect to the target and run \texttt{\acrshort{fio}} to benchmark the throughput and latency of the \acrshort{nvmeof} target. Listing~\ref{lst:nvmeof-kernel-setup} demonstrates an adapted setup of the target~\cite{howto_configure_nvme_over_fabrics}.
+
+
+    \begin{listing}[htbp]
         \centering
-        \begin{minipage}{0.495\columnwidth}
-            \centering
-            \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/nvme-of/graphs/-read-BANDWIDTH.pdf}
-            \caption{Throughput of sequential read operations for NVMe-over-Fabrics with large raw block size}
-            \label{fig:nmve-of-read-bandwidth}
-        \end{minipage}
-        \hfill
-        \begin{minipage}{0.495\columnwidth}
-            \centering
-            \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/nvme-of/graphs/small-read-BANDWIDTH.pdf}
-            \caption{Throughput of sequential read operations for NVMe-over-Fabrics with small raw block size}
-            \label{fig:nmve-of-read-bandwidth-small}
-        \end{minipage}
-    \end{figure}
+        \begin{minted}{bash}
+        # Load kernel modules
+        modprobe nvmet
+        modprobe nvmet-rdma
+        # Setup target for rdma
+        mkdir /sys/kernel/config/nvmet/subsystems/"${SUBSYS}"
+        echo 1 > /sys/kernel/config/nvmet/subsystems/"${SUBSYS}"/attr_allow_any_host
+        echo 1 > /sys/kernel/config/nvmet/subsystems/"${SUBSYS}"/attr_offload
+        mkdir -p /sys/kernel/config/nvmet/subsystems/"${SUBSYS}"/namespaces/1
+        echo -n /dev/"$NVME" > /sys/kernel/config/nvmet/subsystems/"${SUBSYS}"/namespaces/1/device_path
+        echo 1 > /sys/kernel/config/nvmet/subsystems/"${SUBSYS}"/namespaces/1/enable
+        mkdir -p /sys/kernel/config/nvmet/ports/1
+        echo 4420 > /sys/kernel/config/nvmet/ports/1/addr_trsvcid
+        echo ${HOST_IP} > /sys/kernel/config/nvmet/ports/1/addr_traddr
+        echo "rdma" > /sys/kernel/config/nvmet/ports/1/addr_trtype
+        echo "ipv4" > /sys/kernel/config/nvmet/ports/1/addr_adrfam
+        ln -s /sys/kernel/config/nvmet/subsystems/"${SUBSYS}"/ /sys/kernel/config/nvmet/ports/1/subsystems/"${SUBSYS}"
+    \end{minted}
+        \caption{Setup of NVMe-over-Fabrics target with Linux kernel}
+        \label{lst:nvmeof-kernel-setup}
+    \end{listing}
+    
+\subsection{SPDK setup}
+
+Unlike in the kernel \acrshort{nvmeof} implementation, we don't have to use any module nor \texttt{nvme-cli} to connect to the target. \acrshort{spdk} provides a \acrfull{rpc} python script to setup the \acrshort{nvmeof} target and connect to it. The \acrshort{rpc} script is used to create a \acrshort{nvmeof} subsystem, add a namespace to it, and start the \acrshort{nvmeof} target. Listing~\ref{lst:nvmeof-spdk-setup} shows the setup process for both \acrshort{rdma} and \acrshort{tcp}. Then, we can use the \texttt{spdk\_fio} plugin to benchmark the throughput and latency of the \acrshort{nvmeof} target. 
+
+Choosing \acrshort{tcp} with \acrshort{spdk} delegates the \acrshort{nvmeof} operations to \acrshort{spdk} in user-space, but still uses the kernel \acrshort{tcp} stack, as stated in~\citetitle{latecki_spdk_nodate}~\cite{latecki_spdk_nodate}.
+
+\begin{listing}[htbp]
+    \centering
+    \begin{minted}{bash}
+    RPC="~/spdk/scripts/rpc.py" 
+    $RPC bdev_nvme_attach_controller -b Nvme0 -t PCIe -a 0000:02:00.0 
+    $RPC nvmf_create_transport -t RDMA
+    $RPC nvmf_create_transport -t TCP
+    $RPC nvmf_create_subsystem nqn.2016-06.io.spdk:cnode1 -a -s SPDK001
+    $RPC nvmf_subsystem_add_ns nqn.2016-06.io.spdk:cnode1 Nvme0n1
+    $RPC nvmf_subsystem_add_listener nqn.2016-06.io.spdk:cnode1 -t RDMA -a $HOST_IP -s 4420
+    $RPC nvmf_subsystem_add_listener nqn.2016-06.io.spdk:cnode1 -t TCP -a $HOST_IP -s 4420
+    \end{minted}
+    \caption{Setup of NVMe-over-Fabrics target with SPDK}
+    \label{lst:nvmeof-spdk-setup}
+\end{listing}
+
+\subsection{Throughput}
+
+    \begin{figure}[htbp]
+    \centering
+    \adjustbox{max width=0.85\columnwidth, max height=0.5\textheight}{
+    \begin{minipage}{0.495\columnwidth}
+        \centering
+        \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/nvme-of/graphs/-read-BANDWIDTH.pdf}
+        \caption{Throughput of sequential read operations for NVMe-over-Fabrics with large raw block size}
+        \label{fig:nmve-of-read-bandwidth}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.495\columnwidth}
+        \centering
+        \includegraphics[width=\linewidth]{../measurements/npf/experiments/spdk/nvme-of/graphs/small-read-BANDWIDTH.pdf}
+        \caption{Throughput of sequential read operations for NVMe-over-Fabrics with small raw block size}
+        \label{fig:nmve-of-read-bandwidth-small}
+    \end{minipage}}
+\end{figure}
 
 \section{lighttpd performances}
 

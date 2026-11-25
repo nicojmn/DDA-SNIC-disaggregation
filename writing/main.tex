@@ -29,7 +29,7 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning,fit,calc,arrows.meta,backgrounds}
 \usepackage[most]{tcolorbox}
-\usepackage[newfloat]{minted}
+\usepackage[newfloat, cache=true]{minted}
 \usepackage[svgnames]{xcolor}
 \usepackage{booktabs}
 \usepackage{tabularx}
@@ -151,6 +151,21 @@
   bi/.style={{Stealth[length=2.4mm,width=1.7mm]}-{Stealth[length=2.4mm,width=1.7mm]},line width=.9pt,draw=black!85},
   dasharr/.style={-{Stealth[length=2.4mm,width=1.7mm]},line width=.85pt,dashed,draw=black!70},
   lab/.style={inner sep=2pt,font=\scriptsize,align=center},
+}
+
+
+\setminted{
+    fontsize=\scriptsize,
+    frame=single,
+    framesep=2mm,
+    linenos=true,
+    numbersep=8pt,
+    xleftmargin=2em,
+    breaklines=true,
+    autogobble=true,
+    tabsize=2,
+    showspaces=false,
+    showtabs=false
 }
 
 % Document

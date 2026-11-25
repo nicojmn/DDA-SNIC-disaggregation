@@ -876,3 +876,106 @@
 	file = {Full Text PDF:/home/nicolas/Zotero/storage/68ENX5BR/Gao et al. - 2016 - Network Requirements for Resource Disaggregation.pdf:application/pdf},
 }
 
+
+
+@unpublished{sharma_pcie_2020,
+	title = {{PCIe}® 6.0 Specification: The Interconnect for I/O Needs of the Future},
+	url = {https://pcisig.com/sites/default/files/files/PCIe%206.0%20Webinar_Final_.pdf},
+	author = {Sharma, Debendra Das},
+	date = {2020-06-04},
+	langid = {english},
+	file = {PDF:/home/nicolas/Zotero/storage/TWBBC8QP/Sharma - 2020 - PCIe® 6.0 Specification The Interconnect for IO Needs of the Future.pdf:application/pdf},
+}
+
+
+
+@online{nvme-over-pcie-rev1-4,
+	title = {{NVMe} over {PCIe} Transport Specification - {NVM} Express},
+	url = {https://nvmexpress.org/specification/nvme-over-pcie-transport-specification/},
+	abstract = {scalable, efficient, and industry standard},
+	urldate = {2026-11-17},
+	date = {2026-08-04},
+	langid = {american},
+	file = {NVM Express PCI Express Transport Specification, Revision 1.4 - NVM-Express-NVMe-over-PCIe-Transport-Specification-Revision-1.4-Ratified-2026.07.31.pdf:/home/nicolas/Zotero/storage/8CZ7HBIL/NVM-Express-NVMe-over-PCIe-Transport-Specification-Revision-1.4-Ratified-2026.07.31.pdf:application/pdf;Snapshot:/home/nicolas/Zotero/storage/I5FUPDG5/nvme-over-pcie-transport-specification.html:text/html},
+}
+
+
+@article{agrawal_design_2008,
+	title = {Design Tradeoffs for {SSD} Performance},
+	abstract = {Solid-state disks ({SSDs}) have the potential to revolutionize the storage system landscape. However, there is little published work about their internal organization or the design choices that {SSD} manufacturers face in pursuit of optimal performance. This paper presents a taxonomy of such design choices and analyzes the likely performance of various conﬁgurations using a trace-driven simulator and workload traces extracted from real systems. We ﬁnd that {SSD} performance and lifetime is highly workloadsensitive, and that complex systems problems that normally appear higher in the storage stack, or even in distributed systems, are relevant to device ﬁrmware.},
+	author = {Agrawal, Nitin and Prabhakaran, Vijayan and Wobber, Ted and Davis, John D and Manasse, Mark and Panigrahy, Rina},
+	date = {2008},
+	langid = {english},
+	file = {PDF:/home/nicolas/Zotero/storage/XELQJZEP/Agrawal et al. - 2008 - Design Tradeoffs for SSD Performance.pdf:application/pdf},
+}
+
+
+@report{nvme-express-base-specification-rev-2.4,
+	title = {{NVM} Express Base Specification, Revision 2.4},
+	url = {https://nvmexpress.org/wp-content/uploads/NVM-Express-Base-Specification-Revision-2.4-Ratified-2026.07.31.pdf},
+	pages = {870},
+	institution = {{NVM} Express},
+	urldate = {2026-11-17},
+	date = {2026-07-31},
+}
+
+
+@inproceedings{ren_bfq_2024,
+	location = {New York, {NY}, {USA}},
+	title = {{BFQ}, Multiqueue-Deadline, or Kyber? Performance Characterization of Linux Storage Schedulers in the {NVMe} Era},
+	isbn = {979-8-4007-0444-4},
+	url = {https://dl.acm.org/doi/10.1145/3629526.3645053},
+	doi = {10.1145/3629526.3645053},
+	series = {{ICPE} '24},
+	shorttitle = {{BFQ}, Multiqueue-Deadline, or Kyber?},
+	abstract = {Flash {SSDs} have become the de-facto choice to deliver high I/O performance to modern data-intensive workloads. These workloads are often deployed in the cloud, where multiple tenants share access to flash-based {SSDs}. Cloud providers use various techniques, including I/O schedulers available in the Linux kernel, such as {\textbackslash}{textitBFQ}, Multiqueue-Deadline {\textasciitilde}({\textbackslash}mqddl ), and {\textbackslash}kyber, to ensure certain performance qualities (i.e., service-level agreements, {SLAs}). Though designed for fast {NVMe} {SSDs}, there has not been a systematic study of these schedulers for modern, high-performance {SSDs} with their unique challenges. In this paper. we systematically characterize the performance, overheads, and scalability properties of Linux storage schedulers on {NVMe} {SSDs} with millions of I/O operations/s. We report 23 observations and 5 key findings that indicate that (i) {CPU} performance is the primary bottleneck with the Linux storage stack with high-performance {NVMe} {SSDs}; (ii) Linux I/O schedulers can introduce 63.4\% performance overheads with {NVMe} {SSDs}; (iii) {\textbackslash}kyber and q can deliver 99.3\% lower P99 latency than {\textbackslash}none or {\textbackslash}mqddl schedulers in the presence of multiple interfering workloads. We open-source the scripts and datasets of this work at: https://zenodo.org/records/10599514.},
+	pages = {154--165},
+	booktitle = {Proceedings of the 15th {ACM}/{SPEC} International Conference on Performance Engineering},
+	publisher = {Association for Computing Machinery},
+	author = {Ren, Zebin and Doekemeijer, Krijn and Tehrany, Nick and Trivedi, Animesh},
+	urldate = {2026-11-17},
+	date = {2024-05-07},
+	keywords = {linux storage scheduler, measurements, nvme, quality of service},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/RFTZYMIV/Ren et al. - 2024 - BFQ, Multiqueue-Deadline, or Kyber Performance Characterization of Linux Storage Schedulers in the.pdf:application/pdf},
+}
+
+
+@report{latecki_spdk_nodate,
+	title = {{SPDK} {NVMe}-{oF} {TCP} 24.05 Performance Report},
+	url = {https://review.spdk.io/download/performance-reports/SPDK_tcp_mlx_perf_report_2405.pdf},
+	author = {Latecki, Karol},
+	urldate = {2026-11-23},
+	langid = {english},
+	file = {PDF:/home/nicolas/Zotero/storage/74E73W5B/Latecki - SPDK NVMe-oF TCP 24.05 Performance Report.pdf:application/pdf},
+}
+
+
+
+@inproceedings{jia_cetofs_2026,
+	title = {{CETOFS}: A High-Performance File System with Host-Server Collaboration for Remote Storage},
+	isbn = {978-1-939133-53-3},
+	url = {https://www.usenix.org/conference/fast26/presentation/jia},
+	shorttitle = {{CETOFS}},
+	eventtitle = {24th {USENIX} Conference on File and Storage Technologies ({FAST} 26)},
+	pages = {659--674},
+	author = {Jia, Wenqing and Jiang, Dejun and Xiong, Jin},
+	urldate = {2026-11-23},
+	date = {2026},
+	langid = {english},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/5MHUJNAV/Jia et al. - 2026 - CETOFS A High-Performance File System with Host-Server Collaboration for Remote Storage.pdf:application/pdf},
+}
+
+
+@online{ext4_filesystem_kernel_docs,
+	title = {ext4 Filesystem — The Linux Kernel documentation},
+	url = {https://www.kernel.org/doc/html/v4.19/filesystems/ext4/index.html},
+	urldate = {2026-11-23},
+	file = {ext4 Filesystem — The Linux Kernel documentation:/home/nicolas/Zotero/storage/3BKCFLAF/index.html:text/html},
+}
+
+@online{howto_configure_nvme_over_fabrics,
+	title = {{NVIDIA} Enterprise Support Portal {\textbar} {HowTo} Configure {NVMe} over Fabrics},
+	url = {https://enterprise-support.nvidia.com/s/article/howto-configure-nvme-over-fabrics#jive_content_id_NVME_Target_Configuration},
+	urldate = {2026-03-11},
+	file = {NVIDIA Enterprise Support Portal | HowTo Configure NVMe over Fabrics:/home/nicolas/Zotero/storage/7R7B7UR4/howto-configure-nvme-over-fabrics.html:text/html},
+}
