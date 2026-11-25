@@ -314,7 +314,7 @@ While some configurations are able to exceed the vendor theoretical speed of 6.5
     
 \subsection{SPDK setup}
 
-Unlike in the kernel \acrshort{nvmeof} implementation, we don't have to use any module nor \texttt{nvme-cli} to connect to the target. \acrshort{spdk} provides a \acrfull{rpc} python script to setup the \acrshort{nvmeof} target and connect to it. The \acrshort{rpc} script is used to create a \acrshort{nvmeof} subsystem, add a namespace to it, and start the \acrshort{nvmeof} target. Listing~\ref{lst:nvmeof-spdk-setup} shows the setup process for both \acrshort{rdma} and \acrshort{tcp}. Then, we can use the \texttt{spdk\_fio} plugin to benchmark the throughput and latency of the \acrshort{nvmeof} target. 
+Unlike in the kernel \acrshort{nvmeof} implementation, we don't have to use any module nor \texttt{nvme-cli} to connect to the target. \acrshort{spdk} provides a \acrfull{rpc} python script to setup the \acrshort{nvmeof} target and connect to it. The \acrshort{rpc} script is used to create a \acrshort{nvmeof} subsystem, add a namespace to it, and start the \acrshort{nvmeof} target. Listing~\ref{lst:nvmeof-spdk-setup} shows the setup process for both \acrshort{rdma} and \acrshort{tcp}, adapted from~\cite{spdk_nvmf_tgt}. Then, we can use the \texttt{spdk\_fio} plugin to benchmark the throughput and latency of the \acrshort{nvmeof} target.
 
 Choosing \acrshort{tcp} with \acrshort{spdk} delegates the \acrshort{nvmeof} operations to \acrshort{spdk} in user-space, but still uses the kernel \acrshort{tcp} stack, as stated in~\citetitle{latecki_spdk_nodate}~\cite{latecki_spdk_nodate}.
 
