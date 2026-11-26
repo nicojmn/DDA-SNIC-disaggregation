@@ -29,7 +29,7 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning,fit,calc,arrows.meta,backgrounds}
 \usepackage[most]{tcolorbox}
-\usepackage[newfloat]{minted}
+\usepackage[newfloat, cache=true]{minted}
 \usepackage[svgnames]{xcolor}
 \usepackage{booktabs}
 \usepackage{tabularx}
@@ -153,6 +153,21 @@
   lab/.style={inner sep=2pt,font=\scriptsize,align=center},
 }
 
+
+\setminted{
+    fontsize=\scriptsize,
+    frame=single,
+    framesep=2mm,
+    linenos=true,
+    numbersep=8pt,
+    xleftmargin=2em,
+    breaklines=true,
+    autogobble=true,
+    tabsize=2,
+    showspaces=false,
+    showtabs=false
+}
+
 % Document
 \begin{document}
 % Front cover page
@@ -171,8 +186,6 @@
 \newpage
 
 \printglossary[title= List of acronyms, type=\acronymtype]
-\newpage
-\listoflistings
 \newpage
 
 \chapter{Introduction}

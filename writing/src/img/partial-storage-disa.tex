@@ -1,0 +1,34 @@
+\begin{tikzpicture}[font=\small]
+
+        % Conventional server
+        \node[boxtitle] at (0,1.75) {Conventional server};
+        \node[panel, minimum width=3.8cm, minimum height=2.5cm]
+            (server) at (0,0) {};
+        \node[mem, minimum width=2.8cm, minimum height=0.7cm]
+            at (0,0.45) {CPUs and memory};
+        \node[mem, minimum width=2.8cm, minimum height=0.7cm]
+            at (0,-0.55) {Local NVMe SSDs};
+
+        % Compute node
+        \node[panel, minimum width=3.4cm, minimum height=2.5cm]
+            (compute) at (5.6,0) {};
+        \node[boxtitle] at (5.6,0.75) {Compute node};
+        \node[mem, minimum width=2.5cm, minimum height=0.7cm]
+            at (5.6,-0.25) {CPUs + memory};
+
+        % Storage node
+        \node[panel, minimum width=3.4cm, minimum height=2.5cm]
+            (storage) at (10.0,0) {};
+        \node[boxtitle] at (10.0,0.75) {Storage node};
+        \node[mem, minimum width=2.5cm, minimum height=0.7cm]
+            at (10.0,-0.25) {NVMe SSDs};
+
+        % Network connection
+        \draw[bi] (compute.south) |- (7.8,-1.7) -| (storage.south);
+        \node[lab, below=3pt] at (7.8,-1.7) {High-speed network};
+
+        % Architecture title
+        \node[boxtitle] at (7.8,1.75)
+            {Partially disaggregated architecture};
+
+    \end{tikzpicture}

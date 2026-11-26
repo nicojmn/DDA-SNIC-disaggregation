@@ -793,3 +793,205 @@
 	urldate = {2026-11-08},
 	file = {SPDK\: Block Device User Guide:/home/nicolas/Zotero/storage/W6Y7VHVH/bdev.html:text/html},
 }
+
+
+@inproceedings{kim_nvme-over-quic_2026,
+	title = {{NVMe}-over-{QUIC}: Towards Simplifying Secure {NVMe} Fabrics for Disaggregation over Unreliable Networks},
+	volume = {34},
+	url = {https://research.dial.uclouvain.be/entities/publication/88eb6987-1828-45a2-a224-3d1b7fe367dd},
+	shorttitle = {{NVMe}-over-{QUIC}},
+	abstract = {With the growing adoption of disaggregated storage, {NVMe} over Fabrics over {TCP} has emerged as a practical remote storage solution for enterprise and cloud environments, avoiding the managed lossless networks typically required by {RDMA}-based deployments. However, neither {NVMe}/{TCP} nor {NVMe}/{RDMA} provides an efficient built-in security mechanism for protecting storage traffic against eavesdropping in modern data centers and {WAN} deployments. While {NVMe}/{TCP} can be secured using {TLS}, layering {TLS} over {TCP} increases {CPU} overhead and is subject to {TCP} head-of-line blocking under lossy or high-latency conditions. This paper presents {NVMe}-over-{QUIC}, a redesign of {NVMe}-{oF} around a secure, message-oriented, multiplexed transport. Our key insight is to map each {NVMe} I/O request onto an independent {QUIC} stream, eliminating redundant framing and enabling true per-command isolation without cross-command head-of-line blocking. By integrating transport and encryption within {QUIC}, our design also avoids the inefficiencies of {TLS} over {TCP}. To preserve scalability on multi-core systems, we design a {UDP}-based core-affinity architecture aligned with high-performance storage processing models. Evaluation results show up to 4× higher throughput and 10× lower latency under lossy network conditions.},
+	eventtitle = {{IEEE} {ICNP} 2026},
+	booktitle = {34th {IEEE} International Conference on Network Protocols},
+	author = {Kim, Soyong and Barbette, Tom},
+	urldate = {2026-11-11},
+	date = {2026-10-05},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/CQZ78BE2/Kim and Barbette - 2026 - NVMe-over-QUIC Towards Simplifying Secure NVMe Fabrics for Disaggregation over Unreliable Networks.pdf:application/pdf},
+}
+
+
+@online{noauthor_bdevperfnumber_2026,
+	title = {[bdevperf]number of executed cpus doesn't match the setting of cpu core mask · Issue \#1116 · spdk/spdk},
+	url = {https://github.com/spdk/spdk/issues/1116},
+	abstract = {We run bdevperf with {SPDK} bdev to test local {NVMe} {SSD} using following command line: ./bdevperf -w randread -o 4096 -q 32 -t 300 -s 1024 -c /usr/src/spdk/examples/bdev/fio\_plugin/bdev.conf.in -m 0xF...},
+	titleaddon = {{GitHub}},
+	urldate = {2026-11-15},
+	langid = {english},
+	file = {Snapshot:/home/nicolas/Zotero/storage/X8TXTMMV/1116.html:text/html},
+}
+
+
+
+@online{perf-class-github,
+	title = {tbarbette/perf-class: Python parser for Linux Perf profiler to group symbols into classes},
+	url = {https://github.com/tbarbette/perf-class/},
+	urldate = {2026-11-15},
+}
+
+
+@inproceedings{ruan_quicksand_2025,
+	title = {Quicksand: Harnessing Stranded Datacenter Resources with Granular Computing},
+	isbn = {978-1-939133-46-5},
+	url = {https://www.usenix.org/conference/nsdi25/presentation/ruan},
+	shorttitle = {Quicksand},
+	eventtitle = {22nd {USENIX} Symposium on Networked Systems Design and Implementation ({NSDI} 25)},
+	pages = {147--165},
+	author = {Ruan, Zhenyuan and Li, Shihang and Fan, Kaiyan and Park, Seo Jin and Aguilera, Marcos K. and Belay, Adam and Schwarzkopf, Malte},
+	urldate = {2026-11-15},
+	date = {2025},
+	langid = {english},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/PCIIFX6Z/Ruan et al. - 2025 - Quicksand Harnessing Stranded Datacenter Resources with Granular Computing.pdf:application/pdf},
+}
+
+
+@inproceedings{klimovic_flash_2016,
+	location = {New York, {NY}, {USA}},
+	title = {Flash storage disaggregation},
+	isbn = {978-1-4503-4240-7},
+	url = {https://dl.acm.org/doi/10.1145/2901318.2901337},
+	doi = {10.1145/2901318.2901337},
+	series = {{EuroSys} '16},
+	abstract = {{PCIe}-based Flash is commonly deployed to provide datacenter applications with high {IO} rates. However, its capacity and bandwidth are often underutilized as it is difficult to design servers with the right balance of {CPU}, memory and Flash resources over time and for multiple applications. This work examines Flash disaggregation as a way to deal with Flash overprovisioning. We tune remote access to Flash over commodity networks and analyze its impact on workloads sampled from real datacenter applications. We show that, while remote Flash access introduces a 20\% throughput drop at the application level, disaggregation allows us to make up for these overheads through resource-efficient scale-out. Hence, we show that Flash disaggregation allows scaling {CPU} and Flash resources independently in a cost effective manner. We use our analysis to draw conclusions about data and control plane issues in remote storage.},
+	pages = {1--15},
+	booktitle = {Proceedings of the Eleventh European Conference on Computer Systems},
+	publisher = {Association for Computing Machinery},
+	author = {Klimovic, Ana and Kozyrakis, Christos and Thereska, Eno and John, Binu and Kumar, Sanjeev},
+	urldate = {2026-11-14},
+	date = {2016-04-18},
+	keywords = {datacenter, flash, network storage},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/AT9L4NX2/Klimovic et al. - 2016 - Flash storage disaggregation.pdf:application/pdf},
+}
+
+
+@inproceedings{gao_network_2016,
+	title = {Network Requirements for Resource Disaggregation},
+	isbn = {978-1-931971-33-1},
+	url = {https://www.usenix.org/conference/osdi16/technical-sessions/presentation/gao},
+	eventtitle = {12th {USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 16)},
+	pages = {249--264},
+	author = {Gao, Peter X. and Narayan, Akshay and Karandikar, Sagar and Carreira, Joao and Han, Sangjin and Agarwal, Rachit and Ratnasamy, Sylvia and Shenker, Scott},
+	urldate = {2026-11-15},
+	date = {2016},
+	langid = {english},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/68ENX5BR/Gao et al. - 2016 - Network Requirements for Resource Disaggregation.pdf:application/pdf},
+}
+
+
+
+@unpublished{sharma_pcie_2020,
+	title = {{PCIe}® 6.0 Specification: The Interconnect for I/O Needs of the Future},
+	url = {https://pcisig.com/sites/default/files/files/PCIe%206.0%20Webinar_Final_.pdf},
+	author = {Sharma, Debendra Das},
+	date = {2020-06-04},
+	langid = {english},
+	file = {PDF:/home/nicolas/Zotero/storage/TWBBC8QP/Sharma - 2020 - PCIe® 6.0 Specification The Interconnect for IO Needs of the Future.pdf:application/pdf},
+}
+
+
+
+@online{nvme-over-pcie-rev1-4,
+	title = {{NVMe} over {PCIe} Transport Specification - {NVM} Express},
+	url = {https://nvmexpress.org/specification/nvme-over-pcie-transport-specification/},
+	abstract = {scalable, efficient, and industry standard},
+	urldate = {2026-11-17},
+	date = {2026-08-04},
+	langid = {american},
+	file = {NVM Express PCI Express Transport Specification, Revision 1.4 - NVM-Express-NVMe-over-PCIe-Transport-Specification-Revision-1.4-Ratified-2026.07.31.pdf:/home/nicolas/Zotero/storage/8CZ7HBIL/NVM-Express-NVMe-over-PCIe-Transport-Specification-Revision-1.4-Ratified-2026.07.31.pdf:application/pdf;Snapshot:/home/nicolas/Zotero/storage/I5FUPDG5/nvme-over-pcie-transport-specification.html:text/html},
+}
+
+
+@article{agrawal_design_2008,
+	title = {Design Tradeoffs for {SSD} Performance},
+	abstract = {Solid-state disks ({SSDs}) have the potential to revolutionize the storage system landscape. However, there is little published work about their internal organization or the design choices that {SSD} manufacturers face in pursuit of optimal performance. This paper presents a taxonomy of such design choices and analyzes the likely performance of various conﬁgurations using a trace-driven simulator and workload traces extracted from real systems. We ﬁnd that {SSD} performance and lifetime is highly workloadsensitive, and that complex systems problems that normally appear higher in the storage stack, or even in distributed systems, are relevant to device ﬁrmware.},
+	author = {Agrawal, Nitin and Prabhakaran, Vijayan and Wobber, Ted and Davis, John D and Manasse, Mark and Panigrahy, Rina},
+	date = {2008},
+	langid = {english},
+	file = {PDF:/home/nicolas/Zotero/storage/XELQJZEP/Agrawal et al. - 2008 - Design Tradeoffs for SSD Performance.pdf:application/pdf},
+}
+
+
+@report{nvme-express-base-specification-rev-2.4,
+	title = {{NVM} Express Base Specification, Revision 2.4},
+	url = {https://nvmexpress.org/wp-content/uploads/NVM-Express-Base-Specification-Revision-2.4-Ratified-2026.07.31.pdf},
+	pages = {870},
+	institution = {{NVM} Express},
+	urldate = {2026-11-17},
+	date = {2026-07-31},
+}
+
+
+@inproceedings{ren_bfq_2024,
+	location = {New York, {NY}, {USA}},
+	title = {{BFQ}, Multiqueue-Deadline, or Kyber? Performance Characterization of Linux Storage Schedulers in the {NVMe} Era},
+	isbn = {979-8-4007-0444-4},
+	url = {https://dl.acm.org/doi/10.1145/3629526.3645053},
+	doi = {10.1145/3629526.3645053},
+	series = {{ICPE} '24},
+	shorttitle = {{BFQ}, Multiqueue-Deadline, or Kyber?},
+	abstract = {Flash {SSDs} have become the de-facto choice to deliver high I/O performance to modern data-intensive workloads. These workloads are often deployed in the cloud, where multiple tenants share access to flash-based {SSDs}. Cloud providers use various techniques, including I/O schedulers available in the Linux kernel, such as {\textbackslash}{textitBFQ}, Multiqueue-Deadline {\textasciitilde}({\textbackslash}mqddl ), and {\textbackslash}kyber, to ensure certain performance qualities (i.e., service-level agreements, {SLAs}). Though designed for fast {NVMe} {SSDs}, there has not been a systematic study of these schedulers for modern, high-performance {SSDs} with their unique challenges. In this paper. we systematically characterize the performance, overheads, and scalability properties of Linux storage schedulers on {NVMe} {SSDs} with millions of I/O operations/s. We report 23 observations and 5 key findings that indicate that (i) {CPU} performance is the primary bottleneck with the Linux storage stack with high-performance {NVMe} {SSDs}; (ii) Linux I/O schedulers can introduce 63.4\% performance overheads with {NVMe} {SSDs}; (iii) {\textbackslash}kyber and q can deliver 99.3\% lower P99 latency than {\textbackslash}none or {\textbackslash}mqddl schedulers in the presence of multiple interfering workloads. We open-source the scripts and datasets of this work at: https://zenodo.org/records/10599514.},
+	pages = {154--165},
+	booktitle = {Proceedings of the 15th {ACM}/{SPEC} International Conference on Performance Engineering},
+	publisher = {Association for Computing Machinery},
+	author = {Ren, Zebin and Doekemeijer, Krijn and Tehrany, Nick and Trivedi, Animesh},
+	urldate = {2026-11-17},
+	date = {2024-05-07},
+	keywords = {linux storage scheduler, measurements, nvme, quality of service},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/RFTZYMIV/Ren et al. - 2024 - BFQ, Multiqueue-Deadline, or Kyber Performance Characterization of Linux Storage Schedulers in the.pdf:application/pdf},
+}
+
+
+@report{latecki_spdk_nodate,
+	title = {{SPDK} {NVMe}-{oF} {TCP} 24.05 Performance Report},
+	url = {https://review.spdk.io/download/performance-reports/SPDK_tcp_mlx_perf_report_2405.pdf},
+	author = {Latecki, Karol},
+	urldate = {2026-11-23},
+	langid = {english},
+	file = {PDF:/home/nicolas/Zotero/storage/74E73W5B/Latecki - SPDK NVMe-oF TCP 24.05 Performance Report.pdf:application/pdf},
+}
+
+
+
+@inproceedings{jia_cetofs_2026,
+	title = {{CETOFS}: A High-Performance File System with Host-Server Collaboration for Remote Storage},
+	isbn = {978-1-939133-53-3},
+	url = {https://www.usenix.org/conference/fast26/presentation/jia},
+	shorttitle = {{CETOFS}},
+	eventtitle = {24th {USENIX} Conference on File and Storage Technologies ({FAST} 26)},
+	pages = {659--674},
+	author = {Jia, Wenqing and Jiang, Dejun and Xiong, Jin},
+	urldate = {2026-11-23},
+	date = {2026},
+	langid = {english},
+	file = {Full Text PDF:/home/nicolas/Zotero/storage/5MHUJNAV/Jia et al. - 2026 - CETOFS A High-Performance File System with Host-Server Collaboration for Remote Storage.pdf:application/pdf},
+}
+
+
+@online{ext4_filesystem_kernel_docs,
+	title = {ext4 Filesystem — The Linux Kernel documentation},
+	url = {https://www.kernel.org/doc/html/v4.19/filesystems/ext4/index.html},
+	urldate = {2026-11-23},
+	file = {ext4 Filesystem — The Linux Kernel documentation:/home/nicolas/Zotero/storage/3BKCFLAF/index.html:text/html},
+}
+
+@online{howto_configure_nvme_over_fabrics,
+	title = {{NVIDIA} Enterprise Support Portal {\textbar} {HowTo} Configure {NVMe} over Fabrics},
+	url = {https://enterprise-support.nvidia.com/s/article/howto-configure-nvme-over-fabrics#jive_content_id_NVME_Target_Configuration},
+	urldate = {2026-03-11},
+	file = {NVIDIA Enterprise Support Portal | HowTo Configure NVMe over Fabrics:/home/nicolas/Zotero/storage/7R7B7UR4/howto-configure-nvme-over-fabrics.html:text/html},
+}
+
+@online{spdk_nvmf_tgt,
+	title = {{SPDK}: {NVMe} over Fabrics Target},
+	url = {https://spdk.io/doc/nvmf.html},
+	urldate = {2026-11-25},
+	file = {SPDK\: NVMe over Fabrics Target:/home/nicolas/Zotero/storage/YTQ2WLZ9/nvmf.html:text/html},
+}
+
+
+@online{spdk_nvmf_tgt_pg,
+	title = {{SPDK}: {NVMe} over Fabrics Target Programming Guide},
+	url = {https://spdk.io/doc/nvmf_tgt_pg.html},
+	urldate = {2026-11-25},
+	file = {SPDK\: NVMe over Fabrics Target Programming Guide:/home/nicolas/Zotero/storage/EL9UJMQA/nvmf_tgt_pg.html:text/html},
+}
+
